@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search Results - Crossed Hearts Digital Library</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .search-results-page {
+        padding-top: calc(var(--nav-h) + 40px);
+        min-height: 100vh;
+        padding-bottom: 80px;
+      }
+      .search-results-header {
+        max-width: 1100px;
+        margin: 0 auto 32px;
+        padding: 0 24px;
+      }
+      .search-results-title {
+        font-family: var(--font-d);
+        font-size: 28px;
+        color: var(--cream);
+        margin-bottom: 6px;
+      }
+      .search-results-meta {
+        font-family: var(--font-b);
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .search-results-meta span {
+        color: var(--gold);
+      }
+      /* Search bar in results page */
+      .results-search-wrap {
+        max-width: 700px;
+        margin: 0 auto 40px;
+        padding: 0 24px;
+      }
+      .results-search-inner {
+        display: flex;
+        align-items: center;
+        background: var(--ink-card);
+        border: 1px solid var(--border);
+        border-radius: 40px;
+        padding: 10px 20px;
+        gap: 10px;
+      }
+      .results-search-inner input {
+        flex: 1;
+        background: none;
+        border: none;
+        outline: none;
+        font-family: var(--font-b);
+        font-size: 15px;
+        color: var(--cream);
+      }
+      .results-search-inner input::placeholder {
+        color: var(--muted);
+      }
+      .results-search-inner button {
+        background: var(--gold);
+        color: var(--ink);
+        border: none;
+        border-radius: 20px;
+        padding: 8px 20px;
+        font-family: var(--font-b);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      /* Result cards */
+      .results-grid {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 24px;
+      }
+      .result-card {
+        background: var(--ink-card);
+        border: 1px solid var(--border-s);
+        border-radius: var(--r-lg);
+        overflow: hidden;
+        transition:
+          transform 0.2s,
+          border-color 0.2s;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+      }
+      .result-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--border);
+      }
+      .result-card-cover {
+        position: relative;
+        aspect-ratio: 0.707;
+        background: #1a1a2e;
+        overflow: hidden;
+      }
+      .result-card-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .result-card-cover .no-cover {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        background: linear-gradient(135deg, var(--ink-mid), #1a1a2e);
+      }
+      .result-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: var(--gold);
+        color: var(--ink);
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 3px;
+        font-family: var(--font-b);
+        letter-spacing: 0.08em;
+      }
+      .result-card-body {
+        padding: 14px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .result-genre {
+        font-family: var(--font-b);
+        font-size: 10px;
+        color: var(--gold);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .result-title {
+        font-family: var(--font-d);
+        font-size: 15px;
+        color: var(--cream);
+        line-height: 1.3;
+      }
+      .result-highlight {
+        font-family: var(--font-b);
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+      .result-highlight mark {
+        background: var(--gold-dim);
+        color: var(--gold);
+        border-radius: 2px;
+        padding: 0 2px;
+      }
+      .result-price {
+        font-family: var(--font-b);
+        font-size: 13px;
+        color: var(--rose);
+        font-weight: 600;
+        margin-top: auto;
+      }
+      .no-results {
+        max-width: 500px;
+        margin: 60px auto;
+        text-align: center;
+        padding: 0 24px;
+      }
+      .no-results-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+      }
+      .no-results h3 {
+        font-family: var(--font-d);
+        font-size: 24px;
+        color: var(--cream);
+        margin-bottom: 10px;
+      }
+      .no-results p {
+        font-family: var(--font-b);
+        font-size: 14px;
+        color: var(--muted);
+        margin-bottom: 24px;
+      }
+      /* Filter chips */
+      .search-filters {
+        max-width: 1100px;
+        margin: 0 auto 24px;
+        padding: 0 24px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .filter-chip {
+        background: var(--ink-card);
+        border: 1px solid var(--border-s);
+        color: var(--muted);
+        font-size: 12px;
+        padding: 5px 14px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-family: var(--font-b);
+        transition: all 0.2s;
+      }
+      .filter-chip:hover,
+      .filter-chip.active {
+        border-color: var(--gold);
+        color: var(--gold);
+        background: var(--gold-dim);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAV -->
+    <nav class="nav" id="mainNav">
+      <a class="nav-logo" href="index.html">
+        <span class="nav-logo-main">Crossed Hearts</span>
+        <span class="nav-logo-sub">Digital Library</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="alltitles.html">All Titles</a></li>
+        <li><a href="manga.html">Manga</a></li>
+        <li><a href="glambeat.html">Glam Beat</a></li>
+        <li><a href="novels.html">Novels</a></li>
+      </ul>
+      <div class="nav-actions">
+                <a href="cart.html" style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;background:var(--gold-dim);border:1px solid var(--border);border-radius:50%;color:var(--gold);text-decoration:none;transition:all 0.22s;flex-shrink:0;" onmouseover="this.style.background='var(--gold)';this.style.color='var(--ink)'" onmouseout="this.style.background='var(--gold-dim)';this.style.color='var(--gold)'" title="Cart" aria-label="Cart">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          <span class="ch-cart-badge" style="display:none;position:absolute;top:-5px;right:-6px;background:var(--rose);color:#fff;font-size:9px;font-weight:700;font-family:var(--font-b);width:16px;height:16px;border-radius:50%;align-items:center;justify-content:center;">0</span>
+        </a>
+        <a href="my-library.html" class="btn-nav-ghost">My Library</a>
+        <button class="btn-nav-signin" onclick="openAuth()">Sign In</button>
+        <button class="btn-nav-signin" onclick="openLicenserAuth()" style="background:transparent;color:var(--gold);border:1px solid var(--border);margin-left:4px;" onmouseover="this.style.background='var(--gold-dim)'" onmouseout="this.style.background='transparent'">🔏 Licenser</button>
+        <button class="nav-burger" onclick="toggleMobileNav()">☰</button>
+      </div>
+    </nav>
+    <div class="mobile-nav" id="mobileNav">
+      <div
+        style="
+          display: flex;
+          gap: 10px;
+          padding: 14px 0 12px;
+          border-bottom: 1px solid var(--border-s);
+          margin-bottom: 4px;
+          align-items: center;
+        "
+      >
+        <button
+          class="btn-nav-search"
+          onclick="
+            openNavSearch();
+            toggleMobileNav();
+          "
+          aria-label="Search"
+          style="width: 40px; height: 40px; flex-shrink: 0"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </button>
+        <button
+          class="btn-nav-search"
+          onclick="window.location.href = 'filter.html'"
+          aria-label="Filter"
+          style="width: 40px; height: 40px; flex-shrink: 0"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+          </svg>
+        </button>
+        <span
+          style="
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+          "
+          >Search &amp; Filter</span
+        >
+      </div>
+      <a href="index.html">Home</a>
+      <a href="alltitles.html">All Titles</a>
+      <a href="manga.html">Manga</a>
+      <a href="glambeat.html">Glam Beat</a>
+      <a href="novels.html">Novels</a>
+      <a href="cart.html">Cart 🛒</a>
+      <a href="my-library.html">My Library</a>
+      <a onclick="openLicenserAuth()" style="color:var(--gold);">🔏 Licenser Portal</a>
+    </div>
+
+    <div class="search-results-page">
+      <!-- Inline search bar -->
+      <div class="results-search-wrap">
+        <div class="results-search-inner">
+          <span style="font-size: 16px; color: var(--muted)">🔍</span>
+          <input
+            type="text"
+            id="resultsSearchInput"
+            placeholder="Search again…"
+            onkeydown="if (event.key === 'Enter') reSearch();"
+            autocomplete="off"
+          />
+          <button onclick="reSearch()">Search</button>
+        </div>
+      </div>
+
+      <div class="search-results-header">
+        <h1 class="search-results-title">Search Results</h1>
+        <div class="search-results-meta">
+          Showing <span id="resultCount">0</span> results for "<span
+            id="queryDisplay"
+          ></span
+          >"
+        </div>
+      </div>
+
+      <!-- Filter chips -->
+      <div class="search-filters" id="searchFilters">
+        <button class="filter-chip active" onclick="filterResults('all', this)">
+          All
+        </button>
+        <button class="filter-chip" onclick="filterResults('Manga', this)">
+          Manga
+        </button>
+        <button class="filter-chip" onclick="filterResults('Novel', this)">
+          Novels
+        </button>
+        <button class="filter-chip" onclick="filterResults('Glam Beat', this)">
+          Glam Beat
+        </button>
+        <button
+          class="filter-chip"
+          data-mode="category"
+          data-value="Blush Club"
+          onclick="filterResults('Blush Club', this)"
+        >
+          🌸 Blush Club
+        </button>
+        <button
+          class="filter-chip"
+          data-mode="category"
+          data-value="Print"
+          onclick="filterResults('Print', this)"
+        >
+          🖨️ Print Editions
+        </button>
+        <button class="filter-chip" onclick="filterResults('Romance', this)">
+          Romance
+        </button>
+        <button class="filter-chip" onclick="filterResults('Fantasy', this)">
+          Fantasy
+        </button>
+        <button class="filter-chip" onclick="filterResults('Action', this)">
+          Action
+        </button>
+        <button class="filter-chip" onclick="filterResults('Yaoi', this)">
+          Yaoi
+        </button>
+        <button class="filter-chip" onclick="filterResults('BL', this)">
+          BL
+        </button>
+        <button class="filter-chip" onclick="filterResults('Yuri', this)">
+          Yuri
+        </button>
+      </div>
+
+      <div class="results-grid" id="resultsGrid"></div>
+    </div>
+
+    <!-- AUTH MODAL -->
+    <div class="modal-overlay" id="authOverlay" onclick="closeAuthIfBg(event)">
+      <div class="modal">
+        <button class="modal-x" onclick="closeAuth()">✕</button>
+        <div class="modal-title">Welcome Back</div>
+        <div class="modal-sub">Sign in to access your digital library</div>
+        <div class="auth-tabs">
+          <button class="atab active" onclick="switchAuth('in', this)">
+            Sign In
+          </button>
+          <button class="atab" onclick="switchAuth('up', this)">
+            Create Account
+          </button>
+        </div>
+        <div id="authBody"></div>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+    <script>
+      renderAuthForm("in");
+
+      const params = new URLSearchParams(window.location.search);
+      let currentQuery = params.get("q") || "";
+      let currentFilter = "all";
+
+      document.getElementById("resultsSearchInput").value = currentQuery;
+      document.getElementById("queryDisplay").textContent = currentQuery;
+
+      // Master catalog — keep in sync with script.js CATALOG
+      const SEARCH_CATALOG = window.CH_CATALOG || [];
+
+      function renderResults(query, filter) {
+        const grid = document.getElementById("resultsGrid");
+        const q = query.toLowerCase().trim();
+
+        // Chips that match by exact category
+        const CATEGORY_FILTERS = [
+          "Blush Club",
+          "Print",
+          "Manga",
+          "Glam Beat",
+          "Novel",
+        ];
+
+        let filtered = SEARCH_CATALOG.filter((item) => {
+          const text = [item.title, item.genre, item.synopsis, item.keywords]
+            .join(" ")
+            .toLowerCase();
+          const matchesQuery = !q || text.includes(q);
+
+          let matchesFilter = false;
+          if (filter === "all") {
+            matchesFilter = true;
+          } else if (CATEGORY_FILTERS.includes(filter)) {
+            // "Novel" category chip — match both "Novel" category items
+            if (filter === "Novel") {
+              matchesFilter = item.category === "Novel";
+            } else {
+              matchesFilter = item.category === filter;
+            }
+          } else {
+            // Genre keyword match (Romance, Fantasy, Action, Yaoi, BL, Yuri, etc.)
+            matchesFilter =
+              item.genre.toLowerCase().includes(filter.toLowerCase()) ||
+              (item.keywords || "")
+                .toLowerCase()
+                .includes(filter.toLowerCase());
+          }
+
+          return matchesQuery && matchesFilter;
+        });
+
+        document.getElementById("resultCount").textContent = filtered.length;
+
+        if (!filtered.length) {
+          grid.innerHTML = `
+            <div class="no-results" style="grid-column:1/-1">
+              <div class="no-results-icon">📚</div>
+              <h3>No results found</h3>
+              <p>Try different keywords or browse by category below.</p>
+              <a href="library.html" class="btn-gold">Browse All Titles</a>
+            </div>`;
+          return;
+        }
+
+        grid.innerHTML = filtered
+          .map((item) => {
+            const titleHL = highlight(item.title, q);
+            const genreHL = highlight(item.genre, q);
+            const synopsisHL = highlight(
+              item.synopsis.substring(0, 100) + "…",
+              q,
+            );
+            return `
+            <a href="${item.url}" class="result-card">
+              <div class="result-card-cover">
+                ${
+                  item.cover
+                    ? `<img src="${item.cover}" alt="${item.title}" />`
+                    : `<div class="no-cover">📖</div>`
+                }
+                <span class="result-badge">${item.category}</span>
+              </div>
+              <div class="result-card-body">
+                <div class="result-genre">${genreHL}</div>
+                <div class="result-title">${titleHL}</div>
+                <div class="result-highlight">${synopsisHL}</div>
+                <div class="result-price">${item.price}</div>
+              </div>
+            </a>`;
+          })
+          .join("");
+      }
+
+      function highlight(text, query) {
+        if (!query) return text;
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        return text.replace(
+          new RegExp(`(${escaped})`, "gi"),
+          "<mark>$1</mark>",
+        );
+      }
+
+      function filterResults(filter, btn) {
+        currentFilter = filter;
+        document
+          .querySelectorAll(".filter-chip")
+          .forEach((c) => c.classList.remove("active"));
+        btn.classList.add("active");
+        renderResults(currentQuery, currentFilter);
+      }
+
+      function reSearch() {
+        const val = document.getElementById("resultsSearchInput").value.trim();
+        if (val) {
+          const url = new URL(window.location.href);
+          url.searchParams.set("q", val);
+          window.history.pushState({}, "", url);
+          currentQuery = val;
+          document.getElementById("queryDisplay").textContent = val;
+          renderResults(currentQuery, currentFilter);
+        }
+      }
+
+      renderResults(currentQuery, currentFilter);
+    </script>
+  </body>
+</html>

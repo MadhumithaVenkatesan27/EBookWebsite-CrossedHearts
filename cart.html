@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cart - Crossed Hearts Digital Library</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    /* ── CART PAGE LAYOUT ── */
+    .cart-wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: calc(var(--nav-h) + 48px) clamp(16px,4vw,64px) 80px;
+    }
+    .cart-heading {
+      margin-bottom: 40px;
+    }
+    .cart-heading .eyebrow { margin-bottom: 8px; }
+    .cart-heading h1 { font-family: var(--font-d); font-size: clamp(28px,5vw,52px); color: var(--cream); line-height: 1.1; }
+    .cart-heading h1 em { font-style: italic; color: var(--gold); }
+
+    /* Two-column layout on desktop */
+    .cart-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 32px;
+      align-items: start;
+    }
+
+    /* ── ITEM ROWS ── */
+    .cart-items { display: flex; flex-direction: column; gap: 10px; }
+    .cart-item {
+      display: flex; align-items: center; gap: 18px;
+      padding: 18px 20px;
+      background: var(--ink-card); border: 1px solid var(--border-s);
+      border-radius: var(--r-lg); transition: border-color 0.2s;
+    }
+    .cart-item:hover { border-color: var(--border); }
+    .cart-item-cover {
+      width: 60px; height: 88px; border-radius: var(--r);
+      overflow: hidden; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cart-item-cover img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: var(--r); }
+    .cart-item-cover-img {
+      width: 100%; height: 100%; border-radius: var(--r); overflow: hidden;
+      position: relative;
+    }
+    .cart-item-cover-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cart-item-cover-placeholder {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; border-radius: var(--r);
+    }
+    .cart-item-body { flex: 1; min-width: 0; }
+    .cart-item-title {
+      font-family: var(--font-s); font-size: 19px;
+      color: var(--cream); line-height: 1.2; margin-bottom: 3px;
+    }
+    .cart-item-sub { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .cart-item-type {
+      display: inline-block;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; padding: 3px 9px; border-radius: 3px;
+      background: var(--gold-dim); border: 1px solid var(--border);
+      color: var(--gold);
+    }
+    .cart-item-price {
+      font-family: var(--font-d); font-size: 26px;
+      color: var(--gold); flex-shrink: 0; margin-right: 4px;
+    }
+    .cart-item-remove {
+      background: none; border: none; color: var(--muted);
+      cursor: pointer; padding: 6px; border-radius: var(--r);
+      transition: all 0.18s; display: flex; align-items: center;
+      flex-shrink: 0;
+    }
+    .cart-item-remove:hover { color: var(--rose); background: rgba(196,100,122,0.1); }
+
+    /* ── EMPTY STATE ── */
+    .cart-empty {
+      text-align: center; padding: 80px 20px;
+      grid-column: 1 / -1;
+    }
+    .cart-empty-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.4; }
+    .cart-empty h3 { font-family: var(--font-d); font-size: 28px; color: var(--muted); margin-bottom: 8px; }
+    .cart-empty p { font-family: var(--font-s); font-size: 16px; color: var(--muted); margin-bottom: 24px; }
+
+    /* ── ORDER SUMMARY BOX ── */
+    .cart-summary {
+      background: var(--ink-mid); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 28px;
+      position: sticky; top: calc(var(--nav-h) + 20px);
+    }
+    .cart-summary h3 {
+      font-family: var(--font-d); font-size: 20px;
+      color: var(--cream); margin-bottom: 22px;
+    }
+    .summary-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 9px 0; border-bottom: 1px solid var(--border-s);
+      font-size: 13px;
+    }
+    .summary-row:last-of-type { border-bottom: none; }
+    .summary-row .sr-label { color: var(--muted); }
+    .summary-row .sr-value { color: var(--cream-soft); }
+    .summary-total {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 18px; margin-top: 8px; border-top: 1px solid var(--border);
+    }
+    .summary-total-label { font-size: 15px; color: var(--cream); font-family: var(--font-b); font-weight: 500; }
+    .summary-total-value { font-family: var(--font-d); font-size: 32px; color: var(--gold); }
+    .summary-actions { margin-top: 22px; display: flex; flex-direction: column; gap: 10px; }
+    .btn-checkout {
+      width: 100%; padding: 15px;
+      background: var(--gold); color: var(--ink);
+      font-family: var(--font-b); font-size: 12px; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      border: none; border-radius: var(--r); cursor: pointer;
+      transition: all 0.22s; display: flex; align-items: center;
+      justify-content: center; gap: 8px;
+    }
+    .btn-checkout:hover { background: var(--gold-lt); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(201,168,76,0.3); }
+    .btn-checkout:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-continue-shop {
+      width: 100%; padding: 13px;
+      background: transparent; color: var(--muted);
+      font-family: var(--font-b); font-size: 11px; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      border: 1px solid var(--border-s); border-radius: var(--r);
+      cursor: pointer; transition: all 0.2s; text-decoration: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .btn-continue-shop:hover { border-color: var(--border); color: var(--cream); }
+    .summary-secure {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; font-size: 11px; color: var(--muted); margin-top: 14px;
+    }
+
+    /* ── SIGN-IN WARNING ── */
+    .cart-auth-warn {
+      background: var(--ink-mid); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 16px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .cart-auth-warn p { font-size: 13px; color: var(--muted); margin: 0; }
+    .cart-auth-warn strong { color: var(--cream); }
+    .btn-warn-signin {
+      background: var(--gold); color: var(--ink); border: none;
+      padding: 9px 18px; border-radius: var(--r); font-family: var(--font-b);
+      font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; cursor: pointer; transition: background 0.2s;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .btn-warn-signin:hover { background: var(--gold-lt); }
+
+    /* ── SLIDE-OUT ANIMATION ── */
+    .cart-item.removing {
+      opacity: 0; transform: translateX(-10px);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 800px) {
+      .cart-grid { grid-template-columns: 1fr; }
+      .cart-summary { position: static; }
+    }
+    @media (max-width: 480px) {
+      .cart-item { gap: 12px; padding: 14px; }
+      .cart-item-cover { width: 48px; height: 70px; }
+      .cart-item-title { font-size: 16px; }
+      .cart-item-price { font-size: 20px; }
+    }
+  </style>
+</head>
+<body class="page-body">
+
+<!-- NAV -->
+<nav class="nav" id="mainNav">
+  <a class="nav-logo" href="index.html">
+    <span class="nav-logo-main">Crossed Hearts</span>
+    <span class="nav-logo-sub">Digital Library</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="alltitles.html">All Titles</a></li>
+    <li><a href="manga.html">Manga</a></li>
+    <li><a href="glambeat.html">Glam Beat</a></li>
+    <li><a href="blushclub.html">Blush Club</a></li>
+    <li><a href="novels.html">Novels</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="cart.html" style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;background:var(--gold-dim);border:1px solid var(--gold);border-radius:50%;color:var(--gold);text-decoration:none;transition:all 0.22s;flex-shrink:0;" title="Cart" aria-label="Cart">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      <span class="ch-cart-badge" style="display:none;position:absolute;top:-5px;right:-6px;background:var(--rose);color:#fff;font-size:9px;font-weight:700;font-family:var(--font-b);width:16px;height:16px;border-radius:50%;align-items:center;justify-content:center;">0</span>
+    </a>
+    <a href="my-library.html" class="btn-nav-ghost">My Library</a>
+    <button class="btn-nav-signin" onclick="openAuth()" id="navSignIn">Sign In</button>
+    <button class="btn-nav-signin" onclick="signOut()" id="navSignOut" style="display:none">Sign Out</button>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">
+      <span class="icon-dark">🌙</span><span class="icon-light">☀️</span>
+    </button>
+    <button class="nav-burger" onclick="toggleMobileNav()">☰</button>
+  </div>
+</nav>
+<div class="mobile-nav" id="mobileNav">
+  <a href="index.html">Home</a>
+  <a href="alltitles.html">All Titles</a>
+  <a href="manga.html">Manga</a>
+  <a href="glambeat.html">Glam Beat</a>
+  <a href="blushclub.html">Blush Club</a>
+  <a href="novels.html">Novels</a>
+  <a href="cart.html" style="color:var(--gold)">Cart</a>
+  <a href="my-library.html">My Library</a>
+      <a onclick="openLicenserAuth()" style="color:var(--gold);">Licenser Portal</a>
+</div>
+
+<!-- PAGE BODY -->
+<div class="cart-wrap">
+
+  <div class="cart-heading">
+    <span class="eyebrow">Your Selection</span>
+    <h1>Reading <em>Cart</em></h1>
+  </div>
+
+  <!-- Auth warning bar (shown if not signed in) -->
+  <div class="cart-auth-warn" id="cartAuthWarn" style="display:none;">
+    <p><strong>Sign in</strong> to save your cart and complete your purchase.</p>
+    <button class="btn-nav-signin" id="navAuthBtn" onclick="handleNavAuth()">Sign In</button>
+  </div>
+
+  <div class="cart-grid">
+    <!-- Left: items -->
+    <div class="cart-items" id="cartItemsList"></div>
+
+    <!-- Right: summary -->
+    <div id="cartSummaryWrap"></div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-bottom">
+    <span>© 2026 Crossed Hearts. All Rights Reserved.</span>
+    <span>
+      <a href="index.html" style="color:var(--muted)">Home</a> ·
+      <a href="alltitles.html" style="color:var(--muted)">All Titles</a>
+    </span>
+  </div>
+</footer>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authOverlay" onclick="closeAuthIfBg(event)">
+  <div class="modal">
+    <button class="modal-x" onclick="closeAuth()">✕</button>
+    <div class="modal-title">Welcome Back</div>
+    <div class="modal-sub">Sign in to access your digital library</div>
+    <div class="auth-tabs">
+      <button class="atab active" onclick="switchAuth('in',this)">Sign In</button>
+      <button class="atab" onclick="switchAuth('up',this)">Create Account</button>
+    </div>
+    <div id="authBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+<script>
+  renderAuthForm("in");
+  updateNavAuth();
+
+  (function(){ if(localStorage.getItem("ch-theme")==="light") document.body.classList.add("light-mode"); })();
+  function toggleTheme(){ const l=document.body.classList.toggle("light-mode"); localStorage.setItem("ch-theme",l?"light":"dark"); }
+
+  // Show auth warning if not signed in
+  if (!CH_USER) document.getElementById("cartAuthWarn").style.display = "";
+
+  function renderCart() {
+    var list = document.getElementById("cartItemsList");
+    var summaryWrap = document.getElementById("cartSummaryWrap");
+
+    if (!CH_CART.length) {
+      list.innerHTML =
+        '<div class="cart-empty">' +
+          '<div class="cart-empty-icon">🛒</div>' +
+          '<h3>Your cart is empty</h3>' +
+          '<p>Browse our collection and add titles you love.</p>' +
+          '<a href="alltitles.html" class="btn-gold" style="display:inline-block;text-decoration:none;">Browse Titles →</a>' +
+        '</div>';
+      summaryWrap.innerHTML = "";
+      return;
+    }
+
+    list.innerHTML = CH_CART.map(function(item) {
+      var bg = item.coverBg || 'var(--ink-mid)';
+      var coverHtml = item.cover
+        ? '<div class="cart-item-cover-img" style="background:' + bg + '">' +
+            '<img src="' + item.cover + '" alt="cover" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:var(--r)">' +
+          '</div>'
+        : '<div class="cart-item-cover-placeholder" style="background:' + bg + '">📖</div>';
+      var typeLabel = item.chId === "bundle" ? "Full Volume" : "Single Chapter";
+      return (
+        '<div class="cart-item" id="ci-' + item.id + '-' + item.chId + '">' +
+          '<div class="cart-item-cover">' + coverHtml + '</div>' +
+          '<div class="cart-item-body">' +
+            '<div class="cart-item-title">' + item.label + '</div>' +
+            '<div class="cart-item-sub">Digital reading license · online access</div>' +
+            '<span class="cart-item-type">' + typeLabel + '</span>' +
+          '</div>' +
+          '<div class="cart-item-price">$' + parseFloat(item.price).toFixed(2) + '</div>' +
+          '<button class="cart-item-remove" onclick="removeItem(\'' + item.id + "','" + item.chId + '\')" aria-label="Remove">' +
+            '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>' +
+          '</button>' +
+        '</div>'
+      );
+    }).join("");
+
+    var subtotal = chCartSubtotal();
+    summaryWrap.innerHTML =
+      '<div class="cart-summary">' +
+        '<h3>Order Summary</h3>' +
+        '<div class="summary-row"><span class="sr-label">Items (' + CH_CART.length + ')</span><span class="sr-value">$' + subtotal.toFixed(2) + '</span></div>' +
+        '<div class="summary-row"><span class="sr-label">Digital License</span><span class="sr-value">Included</span></div>' +
+        '<div class="summary-row"><span class="sr-label">Instant Access</span><span class="sr-value" style="color:#7ec97e">✓ Yes</span></div>' +
+        '<div class="summary-total">' +
+          '<span class="summary-total-label">Total</span>' +
+          '<span class="summary-total-value">$' + subtotal.toFixed(2) + '</span>' +
+        '</div>' +
+        '<div class="summary-actions">' +
+          '<button class="btn-checkout" id="checkoutBtn" onclick="goCheckout()">' +
+            '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>' +
+            ' Proceed to Checkout' +
+          '</button>' +
+          '<a href="alltitles.html" class="btn-continue-shop">← Continue Browsing</a>' +
+        '</div>' +
+        '<div class="summary-secure">🔒 256-bit SSL · Secured Payment</div>' +
+      '</div>';
+  }
+
+  function removeItem(id, chId) {
+    var el = document.getElementById("ci-" + id + "-" + chId);
+    if (el) {
+      el.classList.add("removing");
+      setTimeout(function() {
+        chRemoveFromCart(id, chId);
+        renderCart();
+      }, 220);
+    } else {
+      chRemoveFromCart(id, chId);
+      renderCart();
+    }
+    showToast("Removed from cart.", "");
+  }
+
+  function goCheckout() {
+    if (!CH_USER) { openAuth(); return; }
+    if (!CH_CART.length) { showToast("Your cart is empty.", "error"); return; }
+    window.location.href = "checkout.html";
+  }
+
+  // Re-render after sign-in
+  var _origOnAuthChange = window.onAuthChange;
+  window.onAuthChange = function() {
+    if (typeof _origOnAuthChange === "function") _origOnAuthChange();
+    document.getElementById("cartAuthWarn").style.display = CH_USER ? "none" : "";
+    renderCart();
+  };
+
+  renderCart();
+</script>
+</body>
+</html>

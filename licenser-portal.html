@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Licenser Portal — Crossed Hearts</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .lic-timer-pill {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--ink-mid);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 5px 14px;
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.06em;
+        user-select: none;
+        transition: border-color 0.3s;
+      }
+      .lic-timer-pill.warning {
+        border-color: rgba(214, 140, 60, 0.5);
+      }
+      .lic-timer-pill.danger {
+        border-color: rgba(196, 100, 122, 0.6);
+      }
+      .lic-timer-dot {
+        width: 6px;
+        height: 6px;
+        background: #4caf76;
+        border-radius: 50%;
+        flex-shrink: 0;
+        animation: licPulse 2s ease infinite;
+      }
+      .lic-timer-dot.warning {
+        background: #d6965a;
+      }
+      .lic-timer-dot.danger {
+        background: var(--rose);
+      }
+      @keyframes licPulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+      #licTimerDisplay {
+        color: var(--cream);
+        font-weight: 500;
+      }
+
+      .lic-info-bar {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 64px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 14px;
+      }
+      .lic-id-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(201, 168, 76, 0.06);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 5px 16px;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        color: var(--gold);
+      }
+
+      .lic-notice-wrap {
+        max-width: 1200px;
+        margin: 0 auto 36px;
+        padding: 0 64px;
+      }
+      .lic-notice {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(201, 168, 76, 0.05);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 11px 18px;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .lic-grid-wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 64px 80px;
+      }
+      .lic-grid-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      /* Volume card — reuses .title-card shape */
+      .lic-vol-card {
+        background: var(--ink-card);
+        border: 1px solid var(--border-s);
+        border-radius: var(--r-lg);
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.32s ease;
+        display: flex;
+        flex-direction: column;
+        animation: fadeUp 0.5s ease both;
+        position: relative;
+      }
+      .lic-vol-card:hover {
+        transform: translateY(-6px);
+        border-color: var(--border);
+        box-shadow: var(--shadow), var(--shadow-g);
+      }
+      .lic-vol-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, var(--gold), var(--rose));
+        opacity: 0;
+        transition: opacity 0.25s;
+      }
+      .lic-vol-card:hover::before {
+        opacity: 1;
+      }
+
+      .lic-cover-wrap {
+        aspect-ratio: 2/3;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .lic-cover-wrap img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+      }
+      .lic-cover-fallback {
+        font-family: var(--font-d);
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.28);
+        text-align: center;
+        padding: 20px;
+        line-height: 1.4;
+        z-index: 1;
+      }
+      .lic-cover-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(8, 5, 8, 0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s;
+        z-index: 2;
+      }
+      .lic-vol-card:hover .lic-cover-overlay {
+        background: rgba(8, 5, 8, 0.74);
+      }
+      .lic-cover-cta {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--gold);
+        opacity: 0;
+        transform: translateY(6px);
+        transition:
+          opacity 0.25s,
+          transform 0.25s;
+      }
+      .lic-vol-card:hover .lic-cover-cta {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .lic-vol-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 3;
+        background: rgba(8, 5, 8, 0.82);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 3px 10px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--gold);
+      }
+
+      .lic-vol-body {
+        padding: 14px 16px 16px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .lic-vol-series {
+        font-size: 9px;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: var(--rose);
+        margin-bottom: 5px;
+      }
+      .lic-vol-title {
+        font-family: var(--font-s);
+        font-size: 14px;
+        color: var(--cream);
+        line-height: 1.35;
+        margin-bottom: 8px;
+        flex: 1;
+      }
+      .lic-vol-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 11px;
+        border-top: 1px solid var(--border-s);
+        gap: 8px;
+      }
+      .lic-vol-pages {
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.1em;
+      }
+
+      @media (max-width: 1024px) {
+        .lic-info-bar,
+        .lic-notice-wrap,
+        .lic-grid-wrap {
+          padding-left: 32px;
+          padding-right: 32px;
+        }
+      }
+      @media (max-width: 768px) {
+        .lic-info-bar,
+        .lic-notice-wrap,
+        .lic-grid-wrap {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+        .lic-timer-pill {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body class="page-body">
+    <!-- NAV -->
+    <nav class="nav" id="mainNav">
+      <a class="nav-logo" href="index.html">
+        <span class="nav-logo-main">Crossed Hearts</span>
+        <span class="nav-logo-sub">Digital Library</span>
+      </a>
+      <ul class="nav-links">
+        <li>
+          <a href="licenser-portal.html" class="active"></a>
+        </li>
+      </ul>
+      <div class="nav-actions">
+        <div
+          class="lic-timer-pill"
+          id="licTimerPill"
+          title="Session time remaining"
+        >
+          <div class="lic-timer-dot" id="licTimerDot"></div>
+          <span id="licTimerDisplay">--:--</span>
+        </div>
+        <span
+          class="btn-nav-ghost"
+          id="licNavName"
+          style="color: var(--gold); font-size: 11px"
+        ></span>
+        <button
+          class="btn-nav-signin"
+          onclick="licSignOut()"
+          style="
+            background: rgba(196, 100, 122, 0.15);
+            color: var(--rose);
+            border: 1px solid rgba(196, 100, 122, 0.3);
+          "
+        >
+          Sign Out
+        </button>
+        <button
+          class="theme-toggle"
+          id="themeToggle"
+          onclick="toggleTheme()"
+          aria-label="Toggle theme"
+        >
+          <span class="icon-dark">🌙</span>
+          <span class="icon-light">☀️</span>
+        </button>
+        <button class="nav-burger" onclick="toggleMobileNav()">☰</button>
+      </div>
+    </nav>
+    <div class="mobile-nav" id="mobileNav">
+      <a href="licenser-portal.html">Licenser Portal</a>
+      <a onclick="licSignOut()">Sign Out</a>
+    </div>
+
+    <!-- PAGE HERO -->
+    <div
+      class="page-hero"
+      style="
+        text-align: left;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-left: 64px;
+        padding-right: 64px;
+      "
+    >
+      <span class="eyebrow">Licenser Review Access</span>
+      <h1>Full <em>Collection</em></h1>
+      <p>All volumes available for authorised review</p>
+    </div>
+
+    <!-- INFO BAR -->
+    <div class="lic-info-bar" style="padding: 20px">
+      <div
+        style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+      >
+        <div class="lic-id-badge">🔑 <span id="licIdDisplay">—</span></div>
+        <div
+          class="lic-id-badge"
+          style="color: var(--muted); background: rgba(255, 255, 255, 0.02)"
+        >
+          👤 <span id="licNameDisplay">—</span>
+        </div>
+      </div>
+      <!-- <div class="drm-notice" style="margin:0;"><span>🛡</span><span>Read-only · No download · Watermarked</span></div> -->
+    </div>
+
+    <!-- NOTICE -->
+    <!-- <div class="lic-notice-wrap">
+      <div class="lic-notice">
+        <span style="color:var(--gold);font-size:14px;flex-shrink:0;">◆</span>
+        <span>All volumes are for online review only. Your Licenser ID is watermarked on every page. Downloading, printing and screen capture are disabled. This session auto-expires after inactivity.</span>
+      </div>
+    </div> -->
+
+    <!-- VOLUMES GRID -->
+    <div class="lic-grid-wrap">
+      <div class="lic-grid-head">
+        <h2 class="section-title" style="font-size: clamp(22px, 3.5vw, 36px)">
+          All <em>Volumes</em>
+        </h2>
+        <span
+          id="licVolCount"
+          class="see-all"
+          style="
+            cursor: default;
+            pointer-events: none;
+            color: var(--muted);
+            font-size: 11px;
+          "
+        ></span>
+      </div>
+      <div class="card-grid" id="licVolGrid"></div>
+    </div>
+
+    <!-- SESSION TIMEOUT MODAL -->
+    <div class="modal-overlay" id="licTimeoutModal">
+      <div class="modal" style="max-width: 420px; text-align: center">
+        <div style="font-size: 40px; margin-bottom: 16px">⏱</div>
+        <div class="modal-title" style="color: var(--rose)">
+          Session Expired
+        </div>
+        <div
+          class="modal-sub"
+          style="
+            font-family: var(--font-s);
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--cream-soft);
+            margin-bottom: 24px;
+          "
+        >
+          Your licenser session has ended for security. Please sign in again.
+        </div>
+        <button class="btn-gold btn-full" onclick="licSignOut()">
+          Return to Site →
+        </button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+    <script>
+      // ── Session timeout: 30 minutes (change here) ──
+      const LIC_TIMEOUT_MIN = 30;
+
+      // ── Guard: redirect if not logged in ──
+      if (!licGuard()) {
+        /* licGuard redirects */
+      }
+
+      // ── Populate UI ──
+      if (CH_LICENSER) {
+        document.getElementById("licNavName").textContent = CH_LICENSER.name;
+        document.getElementById("licIdDisplay").textContent = CH_LICENSER.id;
+        document.getElementById("licNameDisplay").textContent =
+          CH_LICENSER.name;
+      }
+
+      // ── Theme ──
+      (function () {
+        if (localStorage.getItem("ch-theme") === "light")
+          document.body.classList.add("light-mode");
+      })();
+      function toggleTheme() {
+        const l = document.body.classList.toggle("light-mode");
+        localStorage.setItem("ch-theme", l ? "light" : "dark");
+      }
+
+      // ── Session timer ──
+      let licTimeLeft = LIC_TIMEOUT_MIN * 60;
+      let licCountdown = null;
+
+      function licUpdateTimer() {
+        const m = Math.floor(licTimeLeft / 60),
+          s = licTimeLeft % 60;
+        document.getElementById("licTimerDisplay").textContent =
+          String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+        const pill = document.getElementById("licTimerPill"),
+          dot = document.getElementById("licTimerDot");
+        pill.className = "lic-timer-pill";
+        dot.className = "lic-timer-dot";
+        if (licTimeLeft <= 60) {
+          pill.classList.add("danger");
+          dot.classList.add("danger");
+        } else if (licTimeLeft <= 300) {
+          pill.classList.add("warning");
+          dot.classList.add("warning");
+        }
+      }
+      function licResetTimer() {
+        licTimeLeft = LIC_TIMEOUT_MIN * 60;
+        licUpdateTimer();
+      }
+      licUpdateTimer();
+      licCountdown = setInterval(() => {
+        licTimeLeft--;
+        licUpdateTimer();
+        if (licTimeLeft <= 0) {
+          clearInterval(licCountdown);
+          document.getElementById("licTimeoutModal").classList.add("open");
+        }
+      }, 1000);
+      ["mousemove", "keydown", "click", "scroll", "touchstart"].forEach((ev) =>
+        document.addEventListener(ev, licResetTimer, { passive: true }),
+      );
+
+      // ── All volumes definition — mirrors your existing catalogue ──
+      const LIC_VOLUMES = [
+        // MANGA
+        {
+          id: "chigaya-vol1",
+          series: "Manga",
+          num: "Vol.1",
+          title: "You're Way Too Cheeky, Chigaya-kun! Vol.1",
+          cover: "Images/you'reway-vol1.png",
+          pages: "~180 pages",
+        },
+        {
+          id: "chigaya-vol2",
+          series: "Manga",
+          num: "Vol.2",
+          title: "You're Way Too Cheeky, Chigaya-kun! Vol.2",
+          cover: "Images/you'reway-vol2.jpg",
+          pages: "~180 pages",
+        },
+        {
+          id: "executioner-vol1",
+          series: "Manga",
+          num: "Vol.1",
+          title: "The Executioner of Grenimal Vol.1",
+          cover: "Images/executioner-vol1.jpg",
+          pages: "~180 pages",
+        },
+        {
+          id: "executioner-vol2",
+          series: "Manga",
+          num: "Vol.2",
+          title: "The Executioner of Grenimal Vol.2",
+          cover: "Images/executioner-vol2.jpg",
+          pages: "~180 pages",
+        },
+        {
+          id: "matchmaker-vol1",
+          series: "Manga",
+          num: "Vol.1",
+          title: "The Matchmaker's Fiancé Vol.1",
+          cover: "Images/matchmaker-vol1.jpg",
+          pages: "~180 pages",
+        },
+        {
+          id: "allrounder-vol1",
+          series: "Manga",
+          num: "Vol.1",
+          title: "All-Rounder Maid Connie Ville Vol.1",
+          cover: "Images/allrounder-vol1.jpg",
+          pages: "~180 pages",
+        },
+        {
+          id: "allrounder-vol2",
+          series: "Manga",
+          num: "Vol.2",
+          title: "All-Rounder Maid Connie Ville Vol.2",
+          cover: "Images/allrounder-vol2.jpg",
+          pages: "~180 pages",
+        },
+        // GLAM BEAT
+        {
+          id: "borrowing",
+          series: "Glam Beat",
+          num: "Vol.1",
+          title: "Borrowing Your Textbook 175160",
+          cover: "Images/borrowing-vol1.jpg",
+          pages: "~160 pages",
+        },
+        {
+          id: "timeisa",
+          series: "Glam Beat",
+          num: "Vol.1",
+          title: "Time is a Closet",
+          cover: "Images/time-ch1.jpg",
+          pages: "~160 pages",
+        },
+        {
+          id: "afternoon",
+          series: "Glam Beat",
+          num: "Vol.1",
+          title: "Afternoon Tea for Two",
+          cover: "Images/afternoon-ch1.jpg",
+          pages: "~160 pages",
+        },
+        {
+          id: "gaze",
+          series: "Glam Beat",
+          num: "Vol.1",
+          title: "Gaze",
+          cover: "Images/gaze-vol1.jpg",
+          pages: "~160 pages",
+        },
+        // BLUSH CLUB
+        {
+          id: "until",
+          series: "Blush Club",
+          num: "Vol.1",
+          title: "Until We Fall in Love",
+          cover: "Images/until-vol1.jpg",
+          pages: "~160 pages",
+        },
+        {
+          id: "theking",
+          series: "Blush Club",
+          num: "Vol.1",
+          title: "The King of Owls and His Troubled Servant",
+          cover: "Images/theking-vol1.jpg",
+          pages: "~160 pages",
+        },
+        {
+          id: "thebird",
+          series: "Blush Club",
+          num: "Vol.1",
+          title: "The Bird and His Keeper",
+          cover: "Images/thebird-vol1.jpg",
+          pages: "~160 pages",
+        },
+        {
+          id: "room-vol1",
+          series: "Blush Club",
+          num: "Vol.1",
+          title: "Roommate Vol.1",
+          cover: "Images/roommate-vol1.jpg",
+          pages: "~160 pages",
+        },
+        {
+          id: "room-vol2",
+          series: "Blush Club",
+          num: "Vol.2",
+          title: "Roommate Vol.2",
+          cover: "Images/roommate-vol2.jpg",
+          pages: "~160 pages",
+        },
+        // NOVELS
+        {
+          id: "abandonedvillainess-vol1",
+          series: "Novel",
+          num: "Vol.1",
+          title: "The Abandoned Villainess Became a Zombie Vol.1",
+          cover: "Images/theabondoned-vol1.jpg",
+          pages: "~320 pages",
+        },
+        {
+          id: "abandonedvillainess-vol2",
+          series: "Novel",
+          num: "Vol.2",
+          title: "The Abandoned Villainess Became a Zombie Vol.2",
+          cover: "Images/theabondoned-vol2.jpg",
+          pages: "~320 pages",
+        },
+        {
+          id: "whyraeliana-vol1",
+          series: "Novel",
+          num: "Vol.1",
+          title: "Why Raeliana Ended Up at the Duke's Mansion Vol.1",
+          cover: "Images/whyraeliana-vol1.jpg",
+          pages: "~300 pages",
+        },
+        {
+          id: "whyraeliana-vol2",
+          series: "Novel",
+          num: "Vol.2",
+          title: "Why Raeliana Ended Up at the Duke's Mansion Vol.2",
+          cover: "Images/whyraeliana-vol2.jpg",
+          pages: "~300 pages",
+        },
+      ];
+
+      // ── Render grid ──
+      function renderLicVolumes() {
+        const grid = document.getElementById("licVolGrid");
+        const cnt = document.getElementById("licVolCount");
+        cnt.textContent = LIC_VOLUMES.length + " volumes";
+
+        grid.innerHTML = LIC_VOLUMES.map(
+          (vol, i) => `
+          <div class="lic-vol-card" style="animation-delay:${i * 0.055}s"
+               onclick="licOpenVolume('${vol.id}','${vol.title.replace(/'/g, "\\'")}','${vol.cover}')">
+            <div class="lic-cover-wrap">
+              <img src="${vol.cover}" alt="${vol.title}" loading="lazy" onerror="this.style.display='none'">
+              <div class="lic-cover-overlay"><span class="lic-cover-cta">▶ Review →</span></div>
+              <div class="lic-vol-badge">${vol.series}</div>
+            </div>
+            <div class="lic-vol-body">
+              <div class="lic-vol-series">${vol.series} · ${vol.num}</div>
+              <div class="lic-vol-title">${vol.title}</div>
+              <div class="lic-vol-foot">
+                <span class="lic-vol-pages">${vol.pages}</span>
+                <button class="btn-rose" style="font-size:9px;padding:7px 13px;letter-spacing:0.14em;"
+                  onclick="event.stopPropagation();licOpenVolume('${vol.id}','${vol.title.replace(/'/g, "\\'")}','${vol.cover}')">
+                  Review →
+                </button>
+              </div>
+            </div>
+          </div>
+        `,
+        ).join("");
+      }
+
+      function licOpenVolume(id, title, cover) {
+        sessionStorage.setItem("lic_vol", JSON.stringify({ id, title, cover }));
+        window.location.href =
+          "licenser-reader.html?vol=" + encodeURIComponent(id);
+      }
+
+      renderLicVolumes();
+    </script>
+  </body>
+</html>

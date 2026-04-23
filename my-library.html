@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Library - Crossed Hearts Digital Library</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="page-body">
+    <!-- NAV -->
+    <nav class="nav">
+      <a class="nav-logo" href="index.html">
+        <span class="nav-logo-main">Crossed Hearts</span>
+        <span class="nav-logo-sub">Digital Library</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="alltitles.html">All Titles</a></li>
+        <li><a href="manga.html">Manga</a></li>
+        <li><a href="glambeat.html">Glam Beat</a></li>
+        <li><a href="blushclub.html">Blush Club</a></li>
+        <li><a href="novels.html">Novels</a></li>
+        <li><a href="print.html">Print Edition</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a
+          href="cart.html"
+          style="
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            background: var(--gold-dim);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            color: var(--gold);
+            text-decoration: none;
+            transition: all 0.22s;
+            flex-shrink: 0;
+          "
+          onmouseover="
+            this.style.background = 'var(--gold)';
+            this.style.color = 'var(--ink)';
+          "
+          onmouseout="
+            this.style.background = 'var(--gold-dim)';
+            this.style.color = 'var(--gold)';
+          "
+          title="Cart"
+          aria-label="Cart"
+        >
+          <svg
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 01-8 0" />
+          </svg>
+          <span
+            class="ch-cart-badge"
+            style="
+              display: none;
+              position: absolute;
+              top: -5px;
+              right: -6px;
+              background: var(--rose);
+              color: #fff;
+              font-size: 9px;
+              font-weight: 700;
+              font-family: var(--font-b);
+              width: 16px;
+              height: 16px;
+              border-radius: 50%;
+              align-items: center;
+              justify-content: center;
+            "
+            >0</span
+          >
+        </a>
+        <a
+          href="my-alltitles.html"
+          class="btn-nav-ghost"
+          style="color: var(--gold)"
+          >My Library</a
+        >
+        <button
+          class="btn-nav-signin"
+          id="navAuthBtn"
+          onclick="handleNavAuth()"
+        >
+          Sign In
+        </button>
+        <button
+          class="btn-nav-signin btn-nav-licenser"
+          onclick="openLicenserAuth()"
+          style="
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--border);
+            margin-left: 4px;
+          "
+          ...
+        >
+          Licenser</button
+        ><button
+          class="theme-toggle"
+          id="themeToggle"
+          onclick="toggleTheme()"
+          aria-label="Toggle theme"
+        >
+          <span class="icon-dark">🌙</span>
+          <span class="icon-light">☀️</span>
+        </button>
+        <button class="nav-burger" onclick="toggleMobileNav()">☰</button>
+      </div>
+    </nav>
+    <div class="mobile-nav" id="mobileNav">
+      <div
+        style="
+          display: flex;
+          gap: 10px;
+          padding: 14px 0 12px;
+          border-bottom: 1px solid var(--border-s);
+          margin-bottom: 4px;
+          align-items: center;
+        "
+      >
+        <button
+          class="btn-nav-search"
+          onclick="
+            openNavSearch();
+            toggleMobileNav();
+          "
+          aria-label="Search"
+          style="width: 40px; height: 40px; flex-shrink: 0"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </button>
+        <button
+          class="btn-nav-search"
+          onclick="window.location.href = 'filter.html'"
+          aria-label="Filter"
+          style="width: 40px; height: 40px; flex-shrink: 0"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+          </svg>
+        </button>
+        <span
+          style="
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+          "
+          >Search &amp; Filter</span
+        >
+      </div>
+      <a href="index.html">Home</a>
+      <a href="alltitles.html">All Titles</a>
+      <a href="manga.html">Manga</a>
+      <a href="glambeat.html">Glam Beat</a>
+      <a href="blushclub.html">Blush Club</a>
+      <a href="novels.html">Novels</a>
+      <a href="print.html">Print Edition</a>
+      <a href="cart.html">Cart</a>
+      <a onclick="openLicenserAuth()" style="color: var(--gold)"
+        >Licenser Portal</a
+      >
+    </div>
+
+    <!-- PAGE HERO -->
+    <div
+      class="page-hero"
+      style="
+        text-align: left;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-left: 64px;
+        padding-right: 64px;
+      "
+    >
+      <span class="eyebrow">Your Account</span>
+      <h1>My <em>Library</em></h1>
+      <p id="libWelcome" style="text-align: left; margin: 0 0 0 0">
+        All your purchased titles, ready to read anytime.
+      </p>
+    </div>
+
+    <!-- LIBRARY GRID -->
+    <div
+      style="
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: clamp(24px, 5vw, 80px) clamp(16px, 5vw, 64px);
+      "
+    >
+      <!-- TABS -->
+      <div
+        style="display: flex; gap: 8px; margin-bottom: 36px; flex-wrap: wrap"
+        id="libTabs"
+      >
+        <button class="filter-btn active" onclick="filterOwned('all', this)">
+          All Purchases
+        </button>
+        <button class="filter-btn" onclick="filterOwned('manga', this)">
+          Manga
+        </button>
+        <button class="filter-btn" onclick="filterOwned('glambeat', this)">
+          Glam Beat
+        </button>
+        <button class="filter-btn" onclick="filterOwned('novel', this)">
+          Novels
+        </button>
+      </div>
+
+      <div id="libContent">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-bottom">
+        <span>© 2025 Crossed Hearts. All Rights Reserved.</span>
+        <span>
+          <a href="index.html" style="color: var(--muted)">Home</a> ·
+          <a href="alltitles.html" style="color: var(--muted)">All Titles</a>
+        </span>
+      </div>
+    </footer>
+
+    <!-- AUTH MODAL (in case not signed in) -->
+    <div class="modal-overlay" id="authOverlay" onclick="closeAuthIfBg(event)">
+      <div class="modal">
+        <button class="modal-x" onclick="closeAuth()">✕</button>
+        <div class="modal-title">Sign In to View Your Library</div>
+        <div class="modal-sub">
+          Your purchased titles will appear here after signing in.
+        </div>
+        <div class="auth-tabs">
+          <button class="atab active" onclick="switchAuth('in', this)">
+            Sign In
+          </button>
+          <button class="atab" onclick="switchAuth('up', this)">
+            Create Account
+          </button>
+        </div>
+        <div id="authBody"></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+    <script>
+      // Full title metadata for the library
+      const LIB_TITLES = {
+        "chigaya-v1": {
+          title: "You're Way Too Cheeky, Chigaya-kun! Vol.1",
+          cat: "manga",
+          bg: "linear-gradient(145deg,#3d1a2e,#0a0608)",
+          href: "title-chigaya-v1.html",
+          readHref: "reader.html?title=chigaya-v1&ch=ch1",
+          totalCh: 4,
+        },
+        "chigaya-v2": {
+          title: "You're Way Too Cheeky, Chigaya-kun! Vol.2",
+          cat: "manga",
+          bg: "linear-gradient(145deg,#3d152a,#0a0608)",
+          href: "title-chigaya-v2.html",
+          readHref: "reader.html?title=chigaya-v2&ch=ch1",
+          totalCh: 3,
+        },
+        "grenimal-v1": {
+          title: "The Executioner of Grenimal Vol.1",
+          cat: "manga",
+          bg: "linear-gradient(145deg,#1a1a3d,#080508)",
+          href: "title-grenimal-v1.html",
+          readHref: "reader.html?title=grenimal-v1&ch=ch1",
+          totalCh: 3,
+        },
+        "grenimal-v2": {
+          title: "The Executioner of Grenimal Vol.2",
+          cat: "manga",
+          bg: "linear-gradient(145deg,#12123d,#080508)",
+          href: "title-grenimal-v2.html",
+          readHref: "reader.html?title=grenimal-v2&ch=ch1",
+          totalCh: 2,
+        },
+        "matchmaker-v1": {
+          title: "The Matchmaker's Fiancé Vol.1",
+          cat: "manga",
+          bg: "linear-gradient(145deg,#3d2a1a,#080508)",
+          href: "title-matchmaker-v1.html",
+          readHref: "reader.html?title=matchmaker-v1&ch=ch1",
+          totalCh: 2,
+        },
+        "connie-v1": {
+          title: "All-Rounder Maid Connie Ville Vol.1",
+          cat: "manga",
+          bg: "linear-gradient(145deg,#2a1a3d,#080508)",
+          href: "title-connie-v1.html",
+          readHref: "reader.html?title=connie-v1&ch=ch1",
+          totalCh: 2,
+        },
+        "connie-v2": {
+          title: "All-Rounder Maid Connie Ville Vol.2",
+          cat: "manga",
+          bg: "linear-gradient(145deg,#201533,#080508)",
+          href: "title-connie-v2.html",
+          readHref: "reader.html?title=connie-v2&ch=ch1",
+          totalCh: 1,
+        },
+        borrowing: {
+          title: "Borrowing Your Textbook 175160",
+          cat: "glambeat",
+          bg: "linear-gradient(145deg,#1a3d2a,#080508)",
+          href: "title-borrowing.html",
+          readHref: "reader.html?title=borrowing&ch=ch1",
+          totalCh: 4,
+        },
+        timecloset: {
+          title: "Time is a Closet",
+          cat: "glambeat",
+          bg: "linear-gradient(145deg,#3d3a1a,#080508)",
+          href: "title-timecloset.html",
+          readHref: "reader.html?title=timecloset&ch=ch1",
+          totalCh: 2,
+        },
+        afternoontea: {
+          title: "Afternoon Tea for Two",
+          cat: "glambeat",
+          bg: "linear-gradient(145deg,#3d1a3a,#080508)",
+          href: "title-afternoontea.html",
+          readHref: "reader.html?title=afternoontea&ch=ch1",
+          totalCh: 3,
+        },
+        "zombie-v1": {
+          title: "The Abandoned Villainess Became a Zombie Vol.1",
+          cat: "novel",
+          bg: "linear-gradient(145deg,#2a3d1a,#080508)",
+          href: "title-zombie-v1.html",
+          readHref: "reader.html?title=zombie-v1&ch=ch1",
+          totalCh: 2,
+        },
+        "zombie-v2": {
+          title: "The Abandoned Villainess Became a Zombie Vol.2",
+          cat: "novel",
+          bg: "linear-gradient(145deg,#233d14,#080508)",
+          href: "title-zombie-v2.html",
+          readHref: "reader.html?title=zombie-v2&ch=ch1",
+          totalCh: 1,
+        },
+        "raeliana-v1": {
+          title: "Why Raeliana Ended Up at the Duke's Mansion Vol.1",
+          cat: "novel",
+          bg: "linear-gradient(145deg,#3d2a1a,#080508)",
+          href: "title-raeliana-v1.html",
+          readHref: "reader.html?title=raeliana-v1&ch=ch1",
+          totalCh: 2,
+        },
+      };
+
+      const COVER_IMGS = {
+        "chigaya-v1": "Images/you'reway-vol1.png",
+        "chigaya-v2": "Images/you'reway-vol2.jpg",
+        "grenimal-v1": "Images/executioner-vol1.jpg",
+        "grenimal-v2": "Images/executioner-vol2.jpg",
+        "matchmaker-v1": "Images/matchmaker-vol1.jpg",
+        "connie-v1": "Images/allrounder-vol1.jpg",
+        "connie-v2": "Images/allrounder-vol2.jpg",
+        borrowing: "Images/borrowing-vol1.jpg",
+        timecloset: "Images/time-ch.jpg",
+        afternoontea: "Images/afternoon-ch1.jpg",
+        "zombie-v1": "Images/theabondoned-vol1.jpg",
+        "zombie-v2": "Images/theabondoned-vol2.jpg",
+        "raeliana-v1": "Images/whyraeliana-vol1.jpg",
+        "raeliana-v2": "Images/whyraeliana-vol2.jpg",
+        "roommate-vol1": "Images/roommate-vol1.jpg",
+        "roommate-vol2": "Images/roommate-vol2.jpg",
+        gaze: "Images/gaze-vol1.jpg",
+        theking: "Images/theking-vol1.jpg",
+        thebird: "Images/thebird-vol1.jpg",
+        until: "Images/until-vol1.jpg",
+      };
+
+      let activeFilter = "all";
+
+      function filterOwned(cat, btn) {
+        activeFilter = cat;
+        document
+          .querySelectorAll("#libTabs .filter-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderLib();
+      }
+
+      function renderLib() {
+        const content = document.getElementById("libContent");
+        const welcome = document.getElementById("libWelcome");
+
+        // Not signed in
+        if (!CH_USER) {
+          welcome.textContent = "";
+          content.innerHTML = `
+      <div class="empty-lib">
+        <div style="font-size:48px;margin-bottom:16px"></div>
+        <h3>Sign in to view your library</h3>
+        <p>Your purchased chapters and volumes will appear here.</p>
+        <button class="btn-gold" onclick="openAuth()">Sign In</button>
+      </div>
+    `;
+          return;
+        }
+
+        welcome.textContent = `Welcome back, ${CH_USER.name}. Here's everything you own.`;
+
+        // Find owned titles
+        const ownedIds = Object.keys(CH_LIB).filter(
+          (id) => CH_LIB[id]?.length > 0,
+        );
+        let filtered = ownedIds.filter((id) => {
+          const meta = LIB_TITLES[id];
+          return meta && (activeFilter === "all" || meta.cat === activeFilter);
+        });
+
+        if (filtered.length === 0) {
+          const msg =
+            activeFilter === "all"
+              ? "You haven't purchased any digital titles yet."
+              : `No ${activeFilter} titles in your library yet.`;
+          content.innerHTML = `
+      <div class="empty-lib">
+        <div style="font-size:48px;margin-bottom:16px"></div>
+        <h3>${activeFilter === "all" ? "Your library is empty" : `No ${activeFilter} titles yet`}</h3>
+        <p>${msg}</p>
+        <a href="alltitles.html" class="btn-gold">Browse the Digital Library →</a>
+      </div>
+    `;
+          return;
+        }
+
+        content.innerHTML = `<div class="my-lib-grid">${filtered
+          .map((id) => {
+            const meta = LIB_TITLES[id];
+            const owned = CH_LIB[id] || [];
+            const total = meta.totalCh;
+            const hasBundle = owned.includes("bundle");
+            // Chapters that are free reads (not paid, not bundle)
+            // In READER_DATA ch1 is always the free chapter
+            const paidOrFreeChapters = owned.filter((c) => c !== "bundle");
+            const hasFreeOnly =
+              !hasBundle &&
+              paidOrFreeChapters.length > 0 &&
+              paidOrFreeChapters.every((c) => c === "ch1");
+            const pct = hasBundle
+              ? 100
+              : Math.min(
+                  100,
+                  Math.round((paidOrFreeChapters.length / total) * 100),
+                );
+            const label = hasBundle
+              ? "Full Volume"
+              : hasFreeOnly
+                ? "Free Preview"
+                : `${paidOrFreeChapters.length} of ${total} chapters`;
+
+            // Find last read chapter
+            const lastCh = owned[owned.length - 1];
+            const readUrl = `reader.html?title=${id}&ch=${lastCh === "bundle" ? "ch1" : lastCh || "ch1"}`;
+
+            return `
+      <div class="owned-card">
+        <div class="owned-cover" style="background:${meta.bg}">
+          ${COVER_IMGS[id] ? `<img src="${COVER_IMGS[id]}" alt="${meta.title} Cover" loading="lazy">` : ""}
+          <div class="owned-cover-title">${meta.title}</div>
+          <div class="owned-badge-overlay">
+            <span class="ob-label" style="${hasFreeOnly ? "background:rgba(76,175,118,0.85);" : ""}">${label}</span>
+            <span class="ob-pct">${hasBundle ? "100%" : hasFreeOnly ? "Preview" : pct + "%"}</span>
+          </div>
+        </div>
+        <div class="owned-foot">
+          <div class="owned-title">${meta.title}</div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${hasBundle ? 100 : pct}%;${hasFreeOnly ? "background:linear-gradient(90deg,#4caf76,#7ec97e);" : ""}"></div>
+          </div>
+          <button class="btn-continue" onclick="window.location.href='${readUrl}'" style="${hasFreeOnly ? "background:var(--rose);" : ""}">
+            ${hasFreeOnly ? "▶ Continue Preview" : "▶ Continue Reading"}
+          </button>
+          <div style="margin-top:8px">
+            <a href="${meta.href}" style="font-size:11px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">
+              View All Chapters →
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+          })
+          .join("")}</div>`;
+      }
+
+      function onAuthChange() {
+        renderLib();
+      }
+
+      renderLib();
+      renderAuthForm("in");
+
+      (function () {
+        if (localStorage.getItem("ch-theme") === "light") {
+          document.body.classList.add("light-mode");
+        }
+      })();
+
+      function toggleTheme() {
+        const isLight = document.body.classList.toggle("light-mode");
+        localStorage.setItem("ch-theme", isLight ? "light" : "dark");
+      }
+    </script>
+  </body>
+</html>

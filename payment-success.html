@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Purchase Complete - Crossed Hearts Digital Library</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* ── PAYMENT SUCCESS PAGE ── */
+
+      /* Confetti dots */
+      .confetti-area {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        pointer-events: none;
+        z-index: 999;
+      }
+      .c-dot {
+        position: absolute;
+        top: -10px;
+        border-radius: 50%;
+        animation: c-fall var(--dur, 2s) ease-in forwards;
+        animation-delay: var(--delay, 0s);
+      }
+      @keyframes c-fall {
+        to {
+          transform: translateY(105vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      .success-wrap {
+        max-width: 660px;
+        margin: 0 auto;
+        padding: calc(var(--nav-h) + 60px) clamp(16px, 4vw, 40px) 80px;
+        text-align: center;
+      }
+
+      /* Check circle */
+      .success-circle {
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 28px;
+        background: rgba(76, 175, 118, 0.12);
+        border: 1px solid rgba(76, 175, 118, 0.35);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: sc-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      }
+      @keyframes sc-pop {
+        from {
+          transform: scale(0);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .success-circle svg {
+        color: #4caf76;
+      }
+
+      .success-eyebrow {
+        font-family: var(--font-s);
+        font-size: 12px;
+        letter-spacing: 0.45em;
+        text-transform: uppercase;
+        color: var(--gold);
+        display: block;
+        margin-bottom: 10px;
+      }
+      .success-title {
+        font-family: var(--font-d);
+        font-size: clamp(30px, 5.5vw, 52px);
+        color: var(--cream);
+        line-height: 1.1;
+        margin-bottom: 10px;
+      }
+      .success-title em {
+        font-style: italic;
+        color: var(--gold-lt);
+      }
+      .success-sub {
+        font-family: var(--font-s);
+        font-size: 17px;
+        color: var(--cream-soft);
+        line-height: 1.75;
+        margin-bottom: 36px;
+      }
+      .success-sub strong {
+        color: var(--gold-lt);
+        font-style: normal;
+      }
+
+      /* Order details card */
+      .success-order-card {
+        background: var(--ink-mid);
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        padding: 22px 24px;
+        margin-bottom: 24px;
+        text-align: left;
+      }
+      .soc-label {
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 14px;
+        display: block;
+      }
+      .soc-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        font-size: 13px;
+        border-bottom: 1px solid var(--border-s);
+      }
+      .soc-row:last-child {
+        border-bottom: none;
+      }
+      .soc-row .sk {
+        color: var(--muted);
+      }
+      .soc-row .sv {
+        color: var(--cream);
+      }
+      .soc-row .sv.green {
+        color: #4caf76;
+      }
+
+      /* Unlocked books list */
+      .success-books {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 32px;
+        text-align: left;
+      }
+      .success-book-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 13px 16px;
+        background: var(--ink-card);
+        border: 1px solid var(--border-s);
+        border-radius: var(--r);
+      }
+      .sbook-cover {
+        width: 42px;
+        height: 60px;
+        border-radius: var(--r);
+        flex-shrink: 0;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+      }
+      .sbook-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .sbook-body {
+        flex: 1;
+        min-width: 0;
+      }
+      .sbook-title {
+        font-family: var(--font-s);
+        font-size: 17px;
+        color: var(--cream);
+        line-height: 1.25;
+      }
+      .sbook-unlocked {
+        font-size: 11px;
+        color: #4caf76;
+        margin-top: 3px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .btn-read-now {
+        background: var(--gold-dim);
+        border: 1px solid var(--border);
+        color: var(--gold);
+        font-family: var(--font-b);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 8px 14px;
+        border-radius: var(--r);
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .btn-read-now:hover {
+        background: var(--gold);
+        color: var(--ink);
+      }
+
+      /* Action buttons */
+      .success-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+      .btn-go-library {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 28px;
+        background: var(--rose);
+        color: #fff;
+        font-family: var(--font-b);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        text-decoration: none;
+        border: none;
+        border-radius: var(--r);
+        cursor: pointer;
+        transition: all 0.22s;
+      }
+      .btn-go-library:hover {
+        background: #d4748a;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(196, 100, 122, 0.3);
+      }
+      .btn-browse-more {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 28px;
+        background: transparent;
+        color: var(--muted);
+        font-family: var(--font-b);
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        text-decoration: none;
+        border: 1px solid var(--border-s);
+        border-radius: var(--r);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-browse-more:hover {
+        border-color: var(--border);
+        color: var(--cream);
+      }
+
+      /* Email note */
+      .email-note {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .email-note svg {
+        color: var(--gold);
+        flex-shrink: 0;
+      }
+
+      /* Steps progress */
+      .checkout-steps {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 36px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .checkout-steps .step {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .checkout-steps .step.done {
+        color: var(--gold);
+      }
+      .checkout-steps .step-num {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        border: 1px solid currentColor;
+        flex-shrink: 0;
+      }
+      .checkout-steps .step.done .step-num {
+        background: var(--gold);
+        color: var(--ink);
+        border-color: var(--gold);
+      }
+      .checkout-steps .step-arrow {
+        opacity: 0.3;
+      }
+
+      @media (max-width: 480px) {
+        .success-actions {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .btn-go-library,
+        .btn-browse-more {
+          justify-content: center;
+        }
+        .success-book-row {
+          flex-wrap: wrap;
+        }
+      }
+    </style>
+  </head>
+  <body class="page-body">
+    <!-- CONFETTI -->
+    <div class="confetti-area" id="confettiArea"></div>
+
+    <!-- NAV -->
+    <nav class="nav">
+      <a class="nav-logo" href="index.html">
+        <span class="nav-logo-main">Crossed Hearts</span>
+        <span class="nav-logo-sub">Digital Library</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="alltitles.html">All Titles</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a
+          href="my-library.html"
+          class="btn-nav-ghost"
+          style="color: var(--gold)"
+          >My Library</a
+        >
+        <button class="btn-nav-signin" onclick="openAuth()" id="navSignIn">
+          Sign In
+        </button>
+        <button
+          class="btn-nav-signin"
+          onclick="signOut()"
+          id="navSignOut"
+          style="display: none"
+        >
+          Sign Out
+        </button>
+        <button
+          class="theme-toggle"
+          onclick="toggleTheme()"
+          aria-label="Toggle theme"
+        >
+          <span class="icon-dark">🌙</span><span class="icon-light">☀️</span>
+        </button>
+        <button class="nav-burger" onclick="toggleMobileNav()">☰</button>
+      </div>
+    </nav>
+    <div class="mobile-nav" id="mobileNav">
+      <a href="index.html">Home</a>
+      <a href="my-library.html">My Library</a>
+      <a onclick="openLicenserAuth()" style="color: var(--gold)">
+        Licenser Portal</a
+      >
+      <a href="alltitles.html">Browse More</a>
+    </div>
+
+    <!-- PAGE -->
+    <div class="success-wrap">
+      <!-- Steps (all done) -->
+      <div class="checkout-steps">
+        <div class="step done"><span class="step-num">✓</span> Cart</div>
+        <span class="step-arrow">›</span>
+        <div class="step done"><span class="step-num">✓</span> Checkout</div>
+        <span class="step-arrow">›</span>
+        <div class="step done"><span class="step-num">✓</span> Confirmed</div>
+      </div>
+
+      <!-- Check icon -->
+      <div class="success-circle">
+        <svg
+          width="40"
+          height="40"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </div>
+
+      <span class="success-eyebrow">Payment Confirmed</span>
+      <h1 class="success-title">You're all <em>set!</em></h1>
+      <p class="success-sub" id="successSub">
+        Your payment was successful. Your titles are now in your library.
+      </p>
+
+      <!-- Order card -->
+      <div class="success-order-card" id="successOrderCard"></div>
+
+      <!-- Unlocked books -->
+      <div class="success-books" id="successBooks"></div>
+
+      <!-- CTA buttons -->
+      <div class="success-actions">
+        <a href="my-library.html" class="btn-go-library">
+          <svg
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+            <path
+              d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"
+            />
+          </svg>
+          Go to My Library
+        </a>
+        <a href="alltitles.html" class="btn-browse-more">Browse More Titles</a>
+      </div>
+
+      <!-- Email confirmation note -->
+      <div class="email-note" id="emailNote">
+        <svg
+          width="13"
+          height="13"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+          />
+          <polyline points="22,6 12,13 2,6" />
+        </svg>
+        A confirmation receipt has been sent to your email.
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-bottom">
+        <span>© 2026 Crossed Hearts. All Rights Reserved.</span>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- AUTH MODAL -->
+    <div class="modal-overlay" id="authOverlay" onclick="closeAuthIfBg(event)">
+      <div class="modal">
+        <button class="modal-x" onclick="closeAuth()">✕</button>
+        <div class="modal-title">Welcome Back</div>
+        <div class="modal-sub">Sign in to access your digital library</div>
+        <div class="auth-tabs">
+          <button class="atab active" onclick="switchAuth('in', this)">
+            Sign In
+          </button>
+          <button class="atab" onclick="switchAuth('up', this)">
+            Create Account
+          </button>
+        </div>
+        <div id="authBody"></div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      renderAuthForm("in");
+      updateNavAuth();
+      (function () {
+        if (localStorage.getItem("ch-theme") === "light")
+          document.body.classList.add("light-mode");
+      })();
+      function toggleTheme() {
+        var l = document.body.classList.toggle("light-mode");
+        localStorage.setItem("ch-theme", l ? "light" : "dark");
+      }
+
+      function renderSuccess() {
+        var order = null;
+        try {
+          order = JSON.parse(sessionStorage.getItem("ch_last_order") || "null");
+        } catch (e) {}
+        if (!order) {
+          window.location.href = "index.html";
+          return;
+        }
+
+        // Sub text
+        document.getElementById("successSub").innerHTML =
+          "Your payment of <strong>$" +
+          order.total.toFixed(2) +
+          "</strong> was successful. " +
+          (order.items.length === 1 ? "The title is" : "Your titles are") +
+          " now ready to read.";
+
+        // Order card
+        document.getElementById("successOrderCard").innerHTML =
+          '<span class="soc-label">Order Details</span>' +
+          '<div class="soc-row"><span class="sk">Order ID</span><span class="sv" style="font-family:var(--font-b);font-size:12px;">' +
+          order.orderId +
+          "</span></div>" +
+          '<div class="soc-row"><span class="sk">Amount Paid</span><span class="sv">$' +
+          order.total.toFixed(2) +
+          "</span></div>" +
+          '<div class="soc-row"><span class="sk">Payment Status</span><span class="sv green">✓ Verified &amp; Confirmed</span></div>' +
+          '<div class="soc-row"><span class="sk">Date</span><span class="sv">' +
+          order.date +
+          "</span></div>" +
+          (order.email
+            ? '<div class="soc-row"><span class="sk">Receipt sent to</span><span class="sv" style="font-size:12px;">' +
+              order.email +
+              "</span></div>"
+            : "");
+
+        // Books list
+        document.getElementById("successBooks").innerHTML = order.items
+          .map(function (item) {
+            var bg = item.coverBg || "var(--ink-mid)";
+            var coverHtml =
+              '<div style="width:100%;height:100%;background:' +
+              bg +
+              ';position:relative;overflow:hidden;border-radius:var(--r);">' +
+              (item.cover
+                ? '<img src="' +
+                  item.cover +
+                  '" alt="" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display=\'none\'">'
+                : '<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;">📖</span>') +
+              "</div>";
+
+            // Build reader link — for bundle go to chapter 1
+            var readerUrl =
+              "reader.html?title=" +
+              item.id +
+              "&ch=" +
+              (item.chId === "bundle" ? "ch1" : item.chId);
+
+            return (
+              '<div class="success-book-row">' +
+              '<div class="sbook-cover">' +
+              coverHtml +
+              "</div>" +
+              '<div class="sbook-body">' +
+              '<div class="sbook-title">' +
+              item.label +
+              "</div>" +
+              '<div class="sbook-unlocked">' +
+              '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' +
+              " Unlocked — ready to read" +
+              "</div>" +
+              "</div>" +
+              '<a href="' +
+              readerUrl +
+              '" class="btn-read-now">Read Now ▶</a>' +
+              "</div>"
+            );
+          })
+          .join("");
+
+        // Update email note
+        if (order.email) {
+          document.getElementById("emailNote").innerHTML =
+            '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>' +
+            " Confirmation receipt sent to " +
+            order.email;
+        }
+      }
+
+      function spawnConfetti() {
+        var area = document.getElementById("confettiArea");
+        var colors = [
+          "#c9a84c",
+          "#e4c97a",
+          "#c4647a",
+          "#8b2d42",
+          "#4caf76",
+          "#f0e8d8",
+          "#8b7faa",
+        ];
+        for (var i = 0; i < 52; i++) {
+          var d = document.createElement("div");
+          d.className = "c-dot";
+          var size = 5 + Math.random() * 8 + "px";
+          d.style.cssText =
+            "left:" +
+            Math.random() * 100 +
+            "vw;" +
+            "width:" +
+            size +
+            ";height:" +
+            size +
+            ";" +
+            "background:" +
+            colors[Math.floor(Math.random() * colors.length)] +
+            ";" +
+            "--delay:" +
+            Math.random() * 1.6 +
+            "s;" +
+            "--dur:" +
+            (1.8 + Math.random() * 1.4) +
+            "s;";
+          area.appendChild(d);
+        }
+        setTimeout(function () {
+          area.innerHTML = "";
+        }, 5000);
+      }
+
+      renderSuccess();
+      spawnConfetti();
+    </script>
+  </body>
+</html>

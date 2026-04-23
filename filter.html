@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Browse by Genre — Crossed Hearts</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* ── Filter Page Overlay ── */
+      .filter-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1100;
+        background: rgba(8, 5, 8, 0.82);
+        backdrop-filter: blur(6px);
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 90px;
+        padding-bottom: 40px;
+        overflow-y: auto;
+      }
+
+      .filter-modal {
+        position: relative;
+        width: 100%;
+        max-width: 680px;
+        margin: 0 24px;
+      }
+
+      /* Close button — same as nav-search-close */
+      .filter-close {
+        position: absolute;
+        top: -44px;
+        right: 0;
+        background: none;
+        border: none;
+        color: var(--muted);
+        font-size: 20px;
+        cursor: pointer;
+        line-height: 1;
+        transition: color 0.2s;
+      }
+      .filter-close:hover {
+        color: var(--cream);
+      }
+
+      /* Heading */
+      .filter-heading {
+        font-family: var(--font-b);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 14px;
+      }
+
+      /* Genre pill bar — mirrors the search bar inner box */
+      .filter-bar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        background: var(--ink-card);
+        border: 1.5px solid var(--gold);
+        border-radius: 50px;
+        padding: 10px 20px;
+        gap: 8px;
+        box-shadow:
+          0 0 0 4px var(--gold-dim),
+          0 8px 40px rgba(0, 0, 0, 0.6);
+        margin-bottom: 12px;
+      }
+
+      .filter-bar-label {
+        font-family: var(--font-b);
+        font-size: 12px;
+        color: var(--muted);
+        flex-shrink: 0;
+        margin-right: 4px;
+      }
+
+      .fg-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 13px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        font-family: var(--font-b);
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.18s;
+        white-space: nowrap;
+      }
+      .fg-pill:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+        background: var(--gold-dim);
+      }
+      .fg-pill.active {
+        background: var(--gold);
+        border-color: var(--gold);
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      /* Results list — mirrors .nav-search-suggestions */
+      .filter-results {
+        background: var(--ink-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
+        margin-top: 8px;
+      }
+
+      .filter-results-header {
+        padding: 12px 16px 8px;
+        border-bottom: 1px solid var(--border-s);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .filter-results-label {
+        font-family: var(--font-b);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--gold);
+      }
+      .filter-results-count {
+        font-family: var(--font-b);
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      /* Each result row — identical to .nav-suggestion-item */
+      .filter-result-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 16px;
+        border-bottom: 1px solid var(--border-s);
+        text-decoration: none;
+        color: inherit;
+        transition: background 0.15s;
+      }
+      .filter-result-item:last-child {
+        border-bottom: none;
+      }
+      .filter-result-item:hover {
+        background: var(--gold-dim);
+      }
+
+      .filter-result-thumb {
+        width: 44px;
+        height: 58px;
+        border-radius: 3px;
+        background: var(--ink-mid);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        flex-shrink: 0;
+        font-size: 20px;
+      }
+      .filter-result-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .filter-result-text {
+        flex: 1;
+        min-width: 0;
+      }
+      .filter-result-title {
+        font-family: var(--font-b);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--cream);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 3px;
+      }
+      .filter-result-genre {
+        font-family: var(--font-b);
+        font-size: 11px;
+        color: var(--muted);
+        margin-bottom: 2px;
+      }
+      .filter-result-cat {
+        font-family: var(--font-b);
+        font-size: 11px;
+        color: var(--lavender);
+      }
+      .filter-result-price {
+        font-family: var(--font-b);
+        font-size: 12px;
+        color: var(--gold);
+        flex-shrink: 0;
+      }
+
+      /* Empty / prompt states */
+      .filter-empty {
+        padding: 32px 16px;
+        text-align: center;
+        font-family: var(--font-b);
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .filter-empty-icon {
+        font-size: 28px;
+        margin-bottom: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAV -->
+    <nav class="nav" id="mainNav">
+      <a class="nav-logo" href="index.html">
+        <span class="nav-logo-main">Crossed Hearts</span>
+        <span class="nav-logo-sub">Digital Library</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="library.html">Digital Library</a></li>
+        <li><a href="manga.html">Manga</a></li>
+        <li><a href="glambeat.html">Glam Beat</a></li>
+        <li><a href="novels.html">Novels</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button
+          class="btn-nav-search"
+          id="navSearchBtn"
+          onclick="openNavSearch()"
+          aria-label="Search"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </button>
+        <!-- Filter button — lit gold on this page -->
+        <button
+          class="btn-nav-search"
+          id="navFilterBtn"
+          onclick="history.back()"
+          aria-label="Close filter"
+          style="
+            background: var(--gold-dim);
+            border-color: var(--gold);
+            color: var(--gold);
+          "
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+          </svg>
+        </button>
+                <a href="cart.html" style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;background:var(--gold-dim);border:1px solid var(--border);border-radius:50%;color:var(--gold);text-decoration:none;transition:all 0.22s;flex-shrink:0;" onmouseover="this.style.background='var(--gold)';this.style.color='var(--ink)'" onmouseout="this.style.background='var(--gold-dim)';this.style.color='var(--gold)'" title="Cart" aria-label="Cart">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          <span class="ch-cart-badge" style="display:none;position:absolute;top:-5px;right:-6px;background:var(--rose);color:#fff;font-size:9px;font-weight:700;font-family:var(--font-b);width:16px;height:16px;border-radius:50%;align-items:center;justify-content:center;">0</span>
+        </a>
+        <a href="my-library.html" class="btn-nav-ghost">My Library</a>
+        <button class="btn-nav-signin" onclick="openAuth()">Sign In</button>
+        <button class="btn-nav-signin" onclick="openLicenserAuth()" style="background:transparent;color:var(--gold);border:1px solid var(--border);margin-left:4px;" onmouseover="this.style.background='var(--gold-dim)'" onmouseout="this.style.background='transparent'"> Licenser</button>
+        <button
+          class="theme-toggle"
+          id="themeToggle"
+          onclick="toggleTheme()"
+          aria-label="Toggle theme"
+        >
+          <span class="icon-dark">🌙</span>
+          <span class="icon-light">☀️</span>
+        </button>
+        <button class="nav-burger" onclick="toggleMobileNav()">☰</button>
+      </div>
+    </nav>
+    <div class="mobile-nav" id="mobileNav">
+      <div
+        style="
+          display: flex;
+          gap: 10px;
+          padding: 14px 0 12px;
+          border-bottom: 1px solid var(--border-s);
+          margin-bottom: 4px;
+          align-items: center;
+        "
+      >
+        <button
+          class="btn-nav-search"
+          onclick="
+            openNavSearch();
+            toggleMobileNav();
+          "
+          aria-label="Search"
+          style="width: 40px; height: 40px; flex-shrink: 0"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </button>
+        <button
+          class="btn-nav-search"
+          onclick="window.location.href = 'filter.html'"
+          aria-label="Filter"
+          style="width: 40px; height: 40px; flex-shrink: 0"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+          </svg>
+        </button>
+        <span
+          style="
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+          "
+          >Search &amp; Filter</span
+        >
+      </div>
+      <a href="index.html">Home</a>
+      <a href="library.html">Digital Library</a>
+      <a href="manga.html">Manga</a>
+      <a href="glambeat.html">Glam Beat</a>
+      <a href="novels.html">Novels</a>
+      <a href="cart.html">Cart</a>
+      <a href="my-library.html">My Library</a>
+      <a href="licenser-portal.html"> Licenser Portal</a>
+    </div>
+
+    <!-- FILTER OVERLAY -->
+    <div
+      class="filter-overlay"
+      id="filterOverlay"
+      onclick="closeFilterIfBg(event)"
+    >
+      <div class="filter-modal">
+        <!-- Close / back -->
+        <button
+          class="filter-close"
+          onclick="history.back()"
+          aria-label="Close"
+        >
+          &#10005;
+        </button>
+
+        <!-- Heading -->
+        <div class="filter-heading">Browse by Genre</div>
+
+        <!-- Genre pills -->
+        <div class="filter-bar" id="filterBar">
+          <span class="filter-bar-label">Genre</span>
+          <button
+            class="fg-pill active"
+            data-genre="All"
+            onclick="filterBy(this, 'All')"
+          >
+            All
+          </button>
+          <button
+            class="fg-pill"
+            data-genre="Romance"
+            onclick="filterBy(this, 'Romance')"
+          >
+            Romance
+          </button>
+          <button
+            class="fg-pill"
+            data-genre="Fantasy"
+            onclick="filterBy(this, 'Fantasy')"
+          >
+            Fantasy
+          </button>
+          <button
+            class="fg-pill"
+            data-genre="Action"
+            onclick="filterBy(this, 'Action')"
+          >
+            Action
+          </button>
+          <button
+            class="fg-pill"
+            data-genre="Mystery"
+            onclick="filterBy(this, 'Mystery')"
+          >
+            Mystery
+          </button>
+          <button
+            class="fg-pill"
+            data-genre="Comedy"
+            onclick="filterBy(this, 'Comedy')"
+          >
+            Comedy
+          </button>
+          <button
+            class="fg-pill"
+            data-genre="Slice-of-Life"
+            onclick="filterBy(this, 'Slice-of-Life')"
+          >
+            Slice-of-Life
+          </button>
+          <button
+            class="fg-pill"
+            data-genre="Horror"
+            onclick="filterBy(this, 'Horror')"
+          >
+            Horror
+          </button>
+          <button
+            class="fg-pill"
+            data-genre="Yuri"
+            onclick="filterBy(this, 'Yuri')"
+          >
+            Yuri
+          </button>
+          <button
+            class="fg-pill"
+            data-genre="Josei"
+            onclick="filterBy(this, 'Josei')"
+          >
+            Josei
+          </button>
+          <button
+            class="fg-pill"
+            data-genre="School Life"
+            onclick="filterBy(this, 'School Life')"
+          >
+            School Life
+          </button>
+          <button
+            class="fg-pill"
+            data-genre="Historical"
+            onclick="filterBy(this, 'Historical')"
+          >
+            Historical
+          </button>
+          <button
+            class="fg-pill"
+            data-genre="Supernatural"
+            onclick="filterBy(this, 'Supernatural')"
+          >
+            Supernatural
+          </button>
+          <button
+            class="fg-pill"
+            data-genre="BL"
+            onclick="filterBy(this, 'BL')"
+          >
+            BL
+          </button>
+          <button
+            class="fg-pill"
+            data-genre="Yaoi"
+            onclick="filterBy(this, 'Yaoi')"
+          >
+            Yaoi
+          </button>
+          <button
+            class="fg-pill"
+            data-genre="Drama"
+            onclick="filterBy(this, 'Drama')"
+          >
+            Drama
+          </button>
+          <button
+            class="fg-pill"
+            data-category="Blush Club"
+            onclick="filterByCategory(this, 'Blush Club')"
+          >
+            Blush Club
+          </button>
+          <button
+            class="fg-pill"
+            data-category="Print"
+            onclick="filterByCategory(this, 'Print')"
+          >
+            Print Editions
+          </button>
+        </div>
+
+        <!-- Results -->
+        <div class="filter-results" id="filterResults"></div>
+      </div>
+    </div>
+
+    <!-- AUTH MODAL -->
+    <div class="modal-overlay" id="authOverlay" onclick="closeAuthIfBg(event)">
+      <div class="modal">
+        <button class="modal-x" onclick="closeAuth()">✕</button>
+        <div class="modal-title">Welcome Back</div>
+        <div class="modal-sub">Sign in to access your digital library</div>
+        <div class="auth-tabs">
+          <button class="atab active" onclick="switchAuth('in', this)">
+            Sign In
+          </button>
+          <button class="atab" onclick="switchAuth('up', this)">
+            Create Account
+          </button>
+        </div>
+        <div id="authBody"></div>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <!-- NAV SEARCH OVERLAY -->
+    <div
+      class="nav-search-overlay"
+      id="navSearchOverlay"
+      onclick="closeNavSearchIfBg(event)"
+    >
+      <div class="nav-search-modal">
+        <button
+          class="nav-search-close"
+          onclick="closeNavSearch()"
+          aria-label="Close search"
+        >
+          &#10005;
+        </button>
+        <div class="nav-search-inner" id="navSiteSearchBar">
+          <span class="nav-search-icon">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </span>
+          <input
+            type="text"
+            class="nav-search-input"
+            id="navSearchInput"
+            placeholder="Search titles, genres, keywords..."
+            oninput="navLiveSearch(this.value)"
+            onkeydown="if (event.key === 'Enter') navDoSearch();"
+            autocomplete="off"
+          />
+          <button
+            class="nav-search-clear"
+            id="navSearchClear"
+            onclick="navClearSearch()"
+            style="display: none"
+          >
+            &#10005;
+          </button>
+          <button class="nav-search-submit" onclick="navDoSearch()">
+            Search
+          </button>
+        </div>
+        <div class="nav-search-suggestions" id="navSearchSuggestions"></div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      renderAuthForm("in");
+
+      // Theme
+      (function () {
+        if (localStorage.getItem("ch-theme") === "light")
+          document.body.classList.add("light-mode");
+      })();
+      function toggleTheme() {
+        const isLight = document.body.classList.toggle("light-mode");
+        localStorage.setItem("ch-theme", isLight ? "light" : "dark");
+      }
+
+      // Nav search
+      function openNavSearch() {
+        document.getElementById("navSearchOverlay").classList.add("open");
+        setTimeout(() => document.getElementById("navSearchInput").focus(), 80);
+      }
+      function closeNavSearch() {
+        document.getElementById("navSearchOverlay").classList.remove("open");
+        navClearSearch();
+      }
+      function closeNavSearchIfBg(e) {
+        if (e.target === e.currentTarget) closeNavSearch();
+      }
+      function navDoSearch() {
+        const val = document.getElementById("navSearchInput").value.trim();
+        if (val)
+          window.location.href = "search.html?q=" + encodeURIComponent(val);
+      }
+      function navClearSearch() {
+        const inp = document.getElementById("navSearchInput");
+        const box = document.getElementById("navSearchSuggestions");
+        const cl = document.getElementById("navSearchClear");
+        if (inp) inp.value = "";
+        if (box) {
+          box.innerHTML = "";
+          box.classList.remove("open");
+        }
+        if (cl) cl.style.display = "none";
+        inp && inp.focus();
+      }
+      function navLiveSearch(val) {
+        const box = document.getElementById("navSearchSuggestions");
+        const cl = document.getElementById("navSearchClear");
+        if (!box) return;
+        if (cl) cl.style.display = val ? "" : "none";
+        const q = val.trim().toLowerCase();
+        if (!q) {
+          box.innerHTML = "";
+          box.classList.remove("open");
+          return;
+        }
+        const matches = (window.CH_CATALOG || [])
+          .filter((item) =>
+            [item.title, item.genre, item.keywords, item.synopsis]
+              .join(" ")
+              .toLowerCase()
+              .includes(q),
+          )
+          .slice(0, 6);
+        if (!matches.length) {
+          box.innerHTML =
+            '<div class="nav-suggestion-empty">No results — press Search to explore</div>';
+          box.classList.add("open");
+          return;
+        }
+        box.innerHTML = matches
+          .map(
+            (item) => `
+          <a href="${item.url}" class="nav-suggestion-item">
+            <div class="nav-suggestion-thumb">${item.cover ? `<img src="${item.cover}" alt="" />` : "📖"}</div>
+            <div class="nav-suggestion-text">
+              <div class="nav-suggestion-title">${item.title}</div>
+              <div class="nav-suggestion-genre">${item.genre}</div>
+            </div>
+            <div class="nav-suggestion-price">${item.price}</div>
+          </a>`,
+          )
+          .join("");
+        box.classList.add("open");
+      }
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeNavSearch();
+          history.back();
+        }
+      });
+
+      // Close filter overlay if backdrop clicked
+      function closeFilterIfBg(e) {
+        if (e.target === e.currentTarget) history.back();
+      }
+
+      // ── Core filter function ──
+      function filterBy(btn, genre) {
+        // Update active pill
+        document
+          .querySelectorAll(".fg-pill")
+          .forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+
+        // Update URL param without reloading
+        const url = new URL(window.location);
+        if (genre === "All") url.searchParams.delete("genre");
+        else url.searchParams.set("genre", genre);
+        history.replaceState(null, "", url);
+
+        const box = document.getElementById("filterResults");
+        const catalog = window.CH_CATALOG || [];
+
+        const matches =
+          genre === "All"
+            ? catalog
+            : catalog.filter((item) =>
+                item.genre.toLowerCase().includes(genre.toLowerCase()),
+              );
+
+        if (!matches.length) {
+          box.innerHTML = `
+            <div class="filter-empty">
+              <div class="filter-empty-icon">📚</div>
+              No titles found for <strong>${genre}</strong>
+            </div>`;
+          return;
+        }
+
+        const label = genre === "All" ? "All Titles" : genre;
+        box.innerHTML = `
+          <div class="filter-results-header">
+            <span class="filter-results-label">${label}</span>
+            <span class="filter-results-count">${matches.length} title${matches.length !== 1 ? "s" : ""}</span>
+          </div>
+          ${matches
+            .map(
+              (item) => `
+            <a href="${item.url}" class="filter-result-item">
+              <div class="filter-result-thumb">
+                ${item.cover ? `<img src="${item.cover}" alt="" />` : "📖"}
+              </div>
+              <div class="filter-result-text">
+                <div class="filter-result-title">${item.title}</div>
+                <div class="filter-result-genre">${item.genre}</div>
+                <div class="filter-result-cat">${item.category}</div>
+              </div>
+              <div class="filter-result-price">${item.price}</div>
+            </a>`,
+            )
+            .join("")}`;
+      }
+
+      // ── Filter by category (Blush Club, Print Editions) ──
+      function filterByCategory(btn, category) {
+        document
+          .querySelectorAll(".fg-pill")
+          .forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+
+        const url = new URL(window.location);
+        url.searchParams.delete("genre");
+        url.searchParams.set("category", category);
+        history.replaceState(null, "", url);
+
+        const box = document.getElementById("filterResults");
+        const catalog = window.CH_CATALOG || [];
+        const matches = catalog.filter((item) => item.category === category);
+
+        if (!matches.length) {
+          box.innerHTML = `
+            <div class="filter-empty">
+              <div class="filter-empty-icon">📚</div>
+              No titles found in <strong>${category}</strong>
+            </div>`;
+          return;
+        }
+
+        const categoryLabels = {
+          "Blush Club": "🌸 Blush Club — BL & Yaoi",
+          Print: "🖨️ Print Editions",
+        };
+
+        box.innerHTML = `
+          <div class="filter-results-header">
+            <span class="filter-results-label">${categoryLabels[category] || category}</span>
+            <span class="filter-results-count">${matches.length} title${matches.length !== 1 ? "s" : ""}</span>
+          </div>
+          ${matches
+            .map(
+              (item) => `
+            <a href="${item.url}" class="filter-result-item">
+              <div class="filter-result-thumb">
+                ${item.cover ? `<img src="${item.cover}" alt="" />` : "📖"}
+              </div>
+              <div class="filter-result-text">
+                <div class="filter-result-title">${item.title}</div>
+                <div class="filter-result-genre">${item.genre}</div>
+                <div class="filter-result-cat">${item.category}</div>
+              </div>
+              <div class="filter-result-price">${item.price}</div>
+            </a>`,
+            )
+            .join("")}`;
+      }
+
+      // Auto-run on load — honour ?category= or ?genre= param, else show All
+      (function () {
+        const params = new URLSearchParams(window.location.search);
+        const cat = params.get("category");
+        if (cat) {
+          const pill = [...document.querySelectorAll(".fg-pill")].find(
+            (p) =>
+              p.dataset.category &&
+              p.dataset.category.toLowerCase() === cat.toLowerCase(),
+          );
+          if (pill) {
+            filterByCategory(pill, pill.dataset.category);
+            return;
+          }
+        }
+        const g = params.get("genre");
+        if (g) {
+          const pill = [...document.querySelectorAll(".fg-pill")].find(
+            (p) =>
+              p.dataset.genre &&
+              p.dataset.genre.toLowerCase() === g.toLowerCase(),
+          );
+          if (pill) {
+            filterBy(pill, pill.dataset.genre);
+            return;
+          }
+        }
+        // Default: show all titles
+        filterBy(document.querySelector('.fg-pill[data-genre="All"]'), "All");
+      })();
+    </script>
+  </body>
+</html>

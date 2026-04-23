@@ -1,0 +1,1327 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      All-Rounder Maid Connie Wille — Print Edition | Crossed Hearts
+    </title>
+
+    <meta
+      name="description"
+      content="Buy All-Rounder Maid Connie Ville Vol.2 in print. Connie faces new family chaos in this Josei comedy — paperback and hardcover editions. Maid, Slice-of-Life. English edition by Crossed Hearts."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* ── TITLE PAGE LAYOUT ── */
+      /* CHANGE 2: padding-left/right now use clamp() — fluid on every screen */
+      .title-page-wrap {
+        padding-top: calc(var(--nav-h) + 40px);
+        padding-bottom: 80px;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding-left: clamp(16px, 3vw, 48px); /* ← was fixed 24px */
+        padding-right: clamp(16px, 3vw, 48px); /* ← was fixed 24px */
+      }
+
+      /* CHANGE 3: 3-col desktop layout — same as before */
+      .title-layout {
+        display: grid;
+        grid-template-columns: 260px 1fr 280px;
+        gap: 40px;
+        align-items: start;
+      }
+
+      /* ── LEFT COLUMN: Cover + details ── */
+      .title-cover-wrap {
+        position: relative;
+        border-radius: var(--r-lg);
+        overflow: hidden;
+        box-shadow:
+          0 20px 60px rgba(0, 0, 0, 0.7),
+          0 0 0 1px var(--border);
+        margin-bottom: 20px;
+      }
+      .title-cover-wrap img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+      .title-cover-placeholder {
+        width: 100%;
+        aspect-ratio: 0.707;
+        background: linear-gradient(135deg, var(--ink-mid) 0%, #1a1040 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 72px;
+      }
+      .title-cover-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: var(--rose);
+        color: #fff;
+        font-family: var(--font-b);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        padding: 4px 10px;
+        border-radius: 3px;
+        text-transform: uppercase;
+      }
+      .title-meta-box {
+        background: var(--ink-card);
+        border: 1px solid var(--border-s);
+        border-radius: var(--r-lg);
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .title-meta-row {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .title-meta-label {
+        font-family: var(--font-b);
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .title-meta-value {
+        font-family: var(--font-b);
+        font-size: 13px;
+        color: var(--cream-soft);
+        line-height: 1.4;
+      }
+      .title-meta-value.gold {
+        color: var(--gold);
+      }
+      .title-keywords {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 4px;
+      }
+      .title-kw {
+        background: var(--gold-dim);
+        border: 1px solid var(--border);
+        color: var(--gold-lt);
+        font-family: var(--font-b);
+        font-size: 10px;
+        padding: 3px 9px;
+        border-radius: 20px;
+        letter-spacing: 0.06em;
+      }
+      .title-credits {
+        background: var(--ink-card);
+        border: 1px solid var(--border-s);
+        border-radius: var(--r-lg);
+        padding: 14px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .title-credit-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .credit-role {
+        font-family: var(--font-b);
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .credit-name {
+        font-family: var(--font-s);
+        font-size: 14px;
+        color: var(--cream);
+        font-weight: 600;
+      }
+
+      /* ── CENTER COLUMN ── */
+      .title-series-tag {
+        font-family: var(--font-b);
+        font-size: 11px;
+        color: var(--gold);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        display: block;
+      }
+      /* CHANGE 4: title uses clamp() so it scales on mobile without wrapping badly */
+      .title-name {
+        font-family: var(--font-d);
+        font-size: clamp(20px, 4vw, 42px);
+        color: var(--cream);
+        line-height: 1.15;
+        margin-bottom: 8px;
+      }
+      .title-subtitle {
+        font-family: var(--font-s);
+        font-size: 16px;
+        color: var(--muted);
+        margin-bottom: 20px;
+        font-style: italic;
+      }
+      /* CHANGE 5: rating row wraps on narrow screens */
+      .title-rating {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      .stars {
+        color: var(--gold);
+        font-size: 16px;
+        letter-spacing: 2px;
+      }
+      .rating-count {
+        font-family: var(--font-b);
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .title-synopsis-label {
+        font-family: var(--font-b);
+        font-size: 10px;
+        color: var(--gold);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+      .title-synopsis {
+        font-family: var(--font-s);
+        font-size: 17px;
+        color: var(--cream-soft);
+        line-height: 1.75;
+        margin-bottom: 32px;
+      }
+
+      /* Buy buttons */
+      .buy-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 36px;
+      }
+      .btn-buy-volume {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(
+          135deg,
+          var(--gold) 0%,
+          var(--gold-lt) 100%
+        );
+        color: var(--ink);
+        border: none;
+        border-radius: var(--r-lg);
+        padding: 14px 22px;
+        font-family: var(--font-b);
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          opacity 0.2s,
+          transform 0.15s;
+        text-decoration: none;
+      }
+      .btn-buy-volume:hover {
+        opacity: 0.92;
+        transform: translateY(-1px);
+      }
+      .btn-buy-volume .buy-label {
+        font-size: 13px;
+        font-weight: 400;
+        opacity: 0.7;
+      }
+
+      /* Chapter list */
+      .chapters-section {
+      }
+      /* CHANGE 6: header wraps on mobile */
+      .chapters-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border-s);
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .chapters-title {
+        font-family: var(--font-d);
+        font-size: 20px;
+        color: var(--cream);
+      }
+      .chapters-sort {
+        font-family: var(--font-b);
+        font-size: 11px;
+        color: var(--muted);
+        background: none;
+        border: 1px solid var(--border-s);
+        padding: 5px 12px;
+        border-radius: var(--r);
+        cursor: pointer;
+      }
+      .chapter-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .chapter-item {
+        display: grid;
+        grid-template-columns: 90px 1fr auto;
+        gap: 16px;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border-s);
+      }
+      .chapter-item:last-child {
+        border-bottom: none;
+      }
+      .chapter-cover {
+        position: relative;
+        border-radius: var(--r);
+        overflow: hidden;
+        aspect-ratio: 0.707;
+        background: var(--ink-mid);
+      }
+      .chapter-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .chapter-cover.locked {
+        filter: brightness(0.3) saturate(0);
+      }
+      .chapter-cover .lock-icon {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        color: var(--muted);
+      }
+      .chapter-cover-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--ink-mid), #1a1040);
+        font-size: 28px;
+      }
+      .chapter-date {
+        font-family: var(--font-b);
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.08em;
+        margin-bottom: 4px;
+      }
+      .chapter-name {
+        font-family: var(--font-b);
+        font-size: 14px;
+        color: var(--cream);
+        font-weight: 500;
+        margin-bottom: 4px;
+      }
+      .chapter-num {
+        font-family: var(--font-b);
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .chapter-free-tag {
+        display: inline-block;
+        background: rgba(100, 200, 100, 0.15);
+        border: 1px solid rgba(100, 200, 100, 0.3);
+        color: #7ec97e;
+        font-family: var(--font-b);
+        font-size: 9px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 3px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-top: 4px;
+        width: fit-content;
+      }
+      .chapter-action {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+        min-width: 90px;
+      }
+      .chapter-price {
+        font-family: var(--font-b);
+        font-size: 13px;
+        color: var(--gold);
+        font-weight: 600;
+      }
+      .btn-ch-read {
+        background: var(--gold-dim);
+        border: 1px solid var(--border);
+        color: var(--gold);
+        font-family: var(--font-b);
+        font-size: 11px;
+        font-weight: 600;
+        padding: 7px 14px;
+        border-radius: var(--r);
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        letter-spacing: 0.06em;
+        white-space: nowrap;
+      }
+      .btn-ch-read:hover {
+        background: var(--gold);
+        color: var(--ink);
+        border-color: var(--gold);
+      }
+      .btn-ch-buy {
+        background: var(--ink-card);
+        border: 1px solid var(--border-s);
+        color: var(--cream-soft);
+        font-family: var(--font-b);
+        font-size: 11px;
+        padding: 7px 14px;
+        border-radius: var(--r);
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+      .btn-ch-buy:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+
+      /* ── RIGHT COLUMN ── */
+      .availability-card {
+        background: var(--ink-card);
+        border: 1px solid var(--border-s);
+        border-radius: var(--r-lg);
+        padding: 22px;
+        margin-bottom: 16px;
+      }
+      .avail-title {
+        font-family: var(--font-b);
+        font-size: 10px;
+        color: var(--gold);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .avail-title::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border-s);
+      }
+      .avail-section-label {
+        font-family: var(--font-b);
+        font-size: 11px;
+        color: var(--muted);
+        margin-bottom: 10px;
+        margin-top: 14px;
+      }
+      .avail-section-label:first-of-type {
+        margin-top: 0;
+      }
+      .print-editions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .print-edition-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .print-edition-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .print-ed-name {
+        font-family: var(--font-b);
+        font-size: 12px;
+        color: var(--cream-soft);
+      }
+      .btn-print-buy {
+        background: none;
+        border: 1px solid var(--border-s);
+        color: var(--muted);
+        font-family: var(--font-b);
+        font-size: 10px;
+        padding: 5px 10px;
+        border-radius: var(--r);
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .btn-print-buy:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+      .divider-line {
+        border: none;
+        border-top: 1px solid var(--border-s);
+        margin: 16px 0;
+      }
+      .ebook-platforms {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .ebook-platform-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 8px 10px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: var(--r);
+        border: 1px solid var(--border-s);
+        transition: border-color 0.2s;
+      }
+      .ebook-platform-row:hover {
+        border-color: var(--border);
+      }
+      .ebook-platform-name {
+        font-family: var(--font-b);
+        font-size: 12px;
+        color: var(--cream-soft);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-ebook-get {
+        font-family: var(--font-b);
+        font-size: 10px;
+        color: var(--gold);
+        background: var(--gold-dim);
+        border: 1px solid var(--border);
+        padding: 4px 10px;
+        border-radius: var(--r);
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+      .btn-ebook-get:hover {
+        background: var(--gold);
+        color: var(--ink);
+      }
+      .mini-info-card {
+        background: var(--ink-card);
+        border: 1px solid var(--border-s);
+        border-radius: var(--r-lg);
+        padding: 18px 22px;
+        margin-bottom: 16px;
+      }
+      .mini-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 7px 0;
+        border-bottom: 1px solid var(--border-s);
+        font-family: var(--font-b);
+        font-size: 12px;
+      }
+      .mini-info-row:last-child {
+        border-bottom: none;
+      }
+      .mini-info-row .label {
+        color: var(--muted);
+      }
+      .mini-info-row .value {
+        color: var(--cream-soft);
+        font-weight: 500;
+      }
+      .mini-info-row .value.gold {
+        color: var(--gold);
+      }
+
+      /* ================================================
+         TITLE PAGE BREAKPOINTS
+         ================================================ */
+
+      /* ── 1100px ── */
+      @media (max-width: 1100px) {
+        /* CHANGE 7: 3 cols but narrower cover and sidebar */
+        .title-layout {
+          grid-template-columns: 200px 1fr 240px;
+          gap: 28px;
+        }
+      }
+
+      /* ── 900px — tablet portrait ── */
+      @media (max-width: 900px) {
+        /* CHANGE 8: Drop to 2-col: cover+center side-by-side, sidebar below */
+        .title-layout {
+          grid-template-columns: 180px 1fr;
+          gap: 24px;
+        }
+        /* CHANGE 9: Sidebar spans full width */
+        .title-right {
+          grid-column: 1 / -1;
+        }
+        /* Tighten chapter thumbnail */
+        .chapter-item {
+          grid-template-columns: 72px 1fr auto;
+          gap: 12px;
+        }
+      }
+
+      /* ── 680px — large mobile ── */
+      @media (max-width: 680px) {
+        /* CHANGE 10: Full single column layout */
+        .title-layout {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+        /* CHANGE 11: Left column goes side-by-side (cover beside meta) — saves vertical space */
+        .title-left {
+          display: grid;
+          grid-template-columns: 130px 1fr;
+          gap: 14px;
+          align-items: start;
+        }
+        .title-cover-wrap {
+          margin-bottom: 0;
+        }
+        /* CHANGE 12: Hide chapter thumbnails to save space */
+        .chapter-item {
+          grid-template-columns: 1fr auto;
+        }
+        .chapter-cover {
+          display: none;
+        }
+        .chapter-action {
+          min-width: 80px;
+        }
+        .btn-ch-read,
+        .btn-ch-buy {
+          padding: 6px 10px;
+          font-size: 10px;
+        }
+      }
+
+      /* ── 480px — small mobile ── */
+      @media (max-width: 480px) {
+        /* CHANGE 13: Left section cover stacks above meta */
+        .title-left {
+          grid-template-columns: 1fr;
+        }
+        .title-cover-wrap {
+          max-width: 180px;
+          margin-bottom: 14px;
+        }
+        .title-page-wrap {
+          padding-left: 14px;
+          padding-right: 14px;
+          padding-top: calc(var(--nav-h) + 16px);
+        }
+        .chapters-title {
+          font-size: 17px;
+        }
+        .chapter-name {
+          font-size: 13px;
+        }
+        .btn-buy-volume {
+          font-size: 12px;
+          padding: 11px 16px;
+        }
+        .availability-card {
+          padding: 16px;
+        }
+        .mini-info-card {
+          padding: 14px 16px;
+        }
+      }
+    </style>
+  </head>
+  <body class="page-body">
+    <!-- NAV -->
+    <nav class="nav">
+      <a class="nav-logo" href="index.html">
+        <span class="nav-logo-main">Crossed Hearts</span>
+        <span class="nav-logo-sub">Digital Library</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="alltitles.html">All Titles</a></li>
+        <li><a href="manga.html">Manga</a></li>
+        <li><a href="glambeat.html">Glam Beat</a></li>
+        <li><a href="blushclub.html">Blush Club</a></li>
+        <li><a href="novels.html">Novels</a></li>
+        <li><a href="print.html" class="active">Print Editions</a></li>
+      </ul>
+      <div class="nav-actions">
+        <!-- CHANGE 15: Search + Filter icon buttons added (were missing) -->
+        <button
+          class="btn-nav-search"
+          id="navSearchBtn"
+          onclick="openNavSearch()"
+          aria-label="Search"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </button>
+        <button
+          class="btn-nav-search"
+          id="navFilterBtn"
+          onclick="window.location.href = 'filter.html'"
+          aria-label="Filter by genre"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+          </svg>
+        </button>
+        <a
+          href="cart.html"
+          style="
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            background: var(--gold-dim);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            color: var(--gold);
+            text-decoration: none;
+            transition: all 0.22s;
+            flex-shrink: 0;
+          "
+          onmouseover="
+            this.style.background = 'var(--gold)';
+            this.style.color = 'var(--ink)';
+          "
+          onmouseout="
+            this.style.background = 'var(--gold-dim)';
+            this.style.color = 'var(--gold)';
+          "
+          title="Cart"
+          aria-label="Cart"
+        >
+          <svg
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 01-8 0" />
+          </svg>
+          <span
+            class="ch-cart-badge"
+            style="
+              display: none;
+              position: absolute;
+              top: -5px;
+              right: -6px;
+              background: var(--rose);
+              color: #fff;
+              font-size: 9px;
+              font-weight: 700;
+              font-family: var(--font-b);
+              width: 16px;
+              height: 16px;
+              border-radius: 50%;
+              align-items: center;
+              justify-content: center;
+            "
+            >0</span
+          >
+        </a>
+        <a href="my-library.html" class="btn-nav-ghost">My Library</a>
+        <button class="btn-nav-signin" onclick="openAuth()">Sign In</button>
+        <button
+          class="btn-nav-signin"
+          onclick="openLicenserAuth()"
+          style="
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--border);
+            margin-left: 4px;
+          "
+          onmouseover="this.style.background = 'var(--gold-dim)'"
+          onmouseout="this.style.background = 'transparent'"
+        >
+          Licenser
+        </button>
+        <button
+          class="theme-toggle"
+          id="themeToggle"
+          onclick="toggleTheme()"
+          aria-label="Toggle theme"
+        >
+          <span class="icon-dark">🌙</span>
+          <span class="icon-light">☀️</span>
+        </button>
+        <button class="nav-burger" onclick="toggleMobileNav()">☰</button>
+      </div>
+    </nav>
+    <div class="mobile-nav" id="mobileNav">
+      <div
+        style="
+          display: flex;
+          gap: 10px;
+          padding: 14px 0 12px;
+          border-bottom: 1px solid var(--border-s);
+          margin-bottom: 4px;
+          align-items: center;
+        "
+      >
+        <button
+          class="btn-nav-search"
+          onclick="
+            openNavSearch();
+            toggleMobileNav();
+          "
+          aria-label="Search"
+          style="width: 40px; height: 40px; flex-shrink: 0"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </button>
+        <button
+          class="btn-nav-search"
+          onclick="window.location.href = 'filter.html'"
+          aria-label="Filter"
+          style="width: 40px; height: 40px; flex-shrink: 0"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+          </svg>
+        </button>
+        <span
+          style="
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+          "
+          >Search &amp; Filter</span
+        >
+      </div>
+      <a href="index.html">Home</a>
+      <a href="alltitles.html">All Titles</a>
+      <a href="manga.html">Manga</a>
+      <a href="glambeat.html">Glam Beat</a>
+      <a href="blushclub.html">Blush Club</a>
+      <a href="novels.html">Novels</a>
+      <a href="cart.html">Cart </a>
+      <a href="my-library.html">My Library</a>
+      <a href="licenser-portal.html"> Licenser Portal</a>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="title-page-wrap">
+      <!-- BREADCRUMB -->
+      <div
+        style="
+          font-family: var(--font-b);
+          font-size: 12px;
+          color: var(--muted);
+          margin-bottom: 28px;
+          display: flex;
+          gap: 6px;
+          align-items: center;
+          flex-wrap: wrap;
+        "
+      >
+        <a href="index.html">Home</a><span>/</span>
+        <a href="print.html">Print Editions</a><span>/</span>
+        <a href="print.html?cat=manga">Manga</a><span>/</span>
+        <span style="color: var(--gold)"
+          >All-Rounder Maid Connie Wille — Vol.2</span
+        >
+      </div>
+
+      <div class="title-layout">
+        <!-- ══ LEFT: Cover + meta ══ -->
+        <div class="title-left">
+          <!-- Cover -->
+          <div class="title-cover-wrap">
+            <img
+              src="Images/allrounder-vol2.jpg"
+              alt="All-Rounder Maid Connie Wille — Vol.2 Cover"
+            />
+            <div class="title-cover-badge print">PRINT</div>
+          </div>
+
+          <!-- Meta box -->
+          <div class="title-meta-box">
+            <div class="title-meta-row">
+              <span class="title-meta-label">Genre</span>
+              <span class="title-meta-value">Josei · Fantasy · Royalty</span>
+            </div>
+            <div class="title-meta-row">
+              <span class="title-meta-label">Format</span>
+              <span class="title-meta-value"
+                >B6 Paperback · 12.8 × 18.2 cm</span
+              >
+            </div>
+            <div class="title-meta-row">
+              <span class="title-meta-label">Pages</span>
+              <span class="title-meta-value">216 pages</span>
+            </div>
+            <div class="title-meta-row">
+              <span class="title-meta-label">Release</span>
+              <span class="title-meta-value gold">December 29, 2026</span>
+            </div>
+            <div class="title-meta-row">
+              <span class="title-meta-label">Keywords</span>
+              <div class="title-keywords">
+                <span class="title-kw">Josei</span>
+                <span class="title-kw">Fantasy</span>
+                <span class="title-kw">Royalty</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Credits -->
+          <div class="title-credits">
+            <div class="title-credit-row">
+              <span class="credit-role">Art & Story</span>
+              <span class="credit-name">Monaka Tei</span>
+            </div>
+            <div class="title-credit-row">
+              <span class="credit-role">Original Story</span>
+              <span class="credit-name">Kuro Komari</span>
+            </div>
+          </div>
+        </div>
+        <!-- /title-left -->
+
+        <!-- ══ CENTER: Info + synopsis + bonus ══ -->
+        <div class="title-center">
+          <div class="title-heading">
+            <span class="title-series-tag">Manga · Flagship · Teen 13+</span>
+            <h1 class="title-name">All-Rounder Maid Connie Wille</h1>
+            <p class="title-subtitle">Print Edition</p>
+          </div>
+
+          <div class="title-rating">
+            <span class="stars">★★★★★</span>
+            <span class="rating-count">4.8 / 5 · Reader favourite</span>
+          </div>
+
+          <!-- Synopsis -->
+          <div class="title-synopsis-label">Synopsis</div>
+          <p class="title-synopsis">
+            Has that stepbrother of mine finally come to his senses?!" Connie
+            Ville may be an absurdly overpowered castle maid, but all she wants
+            is a calm, practical life. However, when her mother Michelle - who
+            possesses the dangerous power of &lt;Charm&gt; that can drive men
+            mad - remarries Duke Dougler of Halvion, everything spirals out of
+            control. Suddenly, the empire's most infamous and devastatingly
+            handsome flirt, Reinhardt, becomes her stepbrother... and worse, he
+            falls under her mother's spell. Now dragged into Reinhardt's
+            reckless behavior under the influence of &lt;Charm&gt;, Connie must
+            once again navigate chaos she never asked for.
+            <em
+              >A comedic-drama Josei where the heroine commands the narrative
+              without being defined by love!</em
+            >
+          </p>
+          <p
+            style="
+              font-family: var(--font-s);
+              font-size: 15px;
+              color: var(--muted);
+              font-style: italic;
+              margin-bottom: 32px;
+            "
+          >
+            She just wanted a calm, practical life. Instead, she got a
+            stepbrother under a love spell and chaos she absolutely did not sign
+            up for.
+          </p>
+
+          <!-- Buy Print Buttons -->
+          <div class="buy-buttons">
+            <a
+              href="#regular"
+              class="btn-buy-volume"
+              onclick="handleBuyPrint('regular')"
+            >
+              <div>
+                <div>Buy Regular Edition</div>
+                <!-- <div class="buy-label">ISBN 9789347195068</div> -->
+              </div>
+              <span>$12.99</span>
+            </a>
+            <a
+              href="#limited"
+              class="btn-buy-volume ltd"
+              onclick="handleBuyPrint('limited')"
+            >
+              <div>
+                <div>Buy Limited Edition</div>
+                <div class="buy-label">Includes Shikishi</div>
+              </div>
+              <span>$15.99</span>
+            </a>
+          </div>
+
+          <!-- BONUS CONTENT -->
+          <div class="bonus-section">
+            <div class="bonus-section-label">What's Inside</div>
+            <div class="bonus-grid">
+              <div class="bonus-item">
+                <!-- <div class="bonus-icon"></div> -->
+                <div class="bonus-name">216-page Volume</div>
+                <div class="bonus-desc">Full manga in paperback format</div>
+                <span class="bonus-tag reg">Regular + Ltd</span>
+              </div>
+              <div class="bonus-item">
+                <!-- <div class="bonus-icon"></div> -->
+                <div class="bonus-name">Shikishi Art</div>
+                <div class="bonus-desc">
+                  Never released art on traditional Shikishi board for the
+                  English release
+                </div>
+                <span class="bonus-tag ltd">Limited Only</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Also read digitally -->
+          <div class="also-avail-card">
+            <strong>Also Available Digitally</strong>
+            Read chapter by chapter on Crossed Hearts or grab the e-book for
+            <strong>$6.99</strong>
+            <a href="allrounder-vol2.html">View digital edition →</a>
+          </div>
+        </div>
+        <!-- /title-center -->
+
+        <!-- ══ RIGHT: Edition details ══ -->
+        <div class="title-right">
+          <!-- Quick spec card -->
+          <div class="mini-info-card">
+            <div class="mini-info-row">
+              <span class="label">Volume</span>
+              <span class="value">1 of 3+</span>
+            </div>
+            <div class="mini-info-row">
+              <span class="label">Pages</span>
+              <span class="value">216</span>
+            </div>
+            <div class="mini-info-row">
+              <span class="label">Size</span>
+              <span class="value">B6 · 12.8 × 18.2 cm</span>
+            </div>
+            <div class="mini-info-row">
+              <span class="label">Release</span>
+              <span class="value">December 29, 2026</span>
+            </div>
+            <div class="mini-info-row">
+              <span class="label">Rating</span>
+              <span class="value gold">★ 4.8 / 5</span>
+            </div>
+            <div class="mini-info-row">
+              <span class="label">Age Rating</span>
+              <span class="value">Teen 13+</span>
+            </div>
+          </div>
+
+          <!-- EDITION COMPARISON -->
+          <div class="edition-card">
+            <div class="edition-card-title">Choose Your Edition</div>
+
+            <!-- Regular -->
+            <div class="edition-row">
+              <div class="edition-row-top">
+                <span class="edition-name">Regular Edition</span>
+                <span class="edition-price">$12.99</span>
+              </div>
+              <!-- <div class="edition-isbn">ISBN 9789347195068</div> -->
+              <div class="edition-includes">✓ 216-page volume</div>
+              <a
+                href="#"
+                class="btn-buy-ed"
+                onclick="
+                  handleBuyPrint('regular');
+                  return false;
+                "
+                >Order Regular →</a
+              >
+            </div>
+
+            <!-- Limited -->
+            <div class="edition-row">
+              <div class="edition-row-top">
+                <span class="edition-name">Limited Edition</span>
+                <span class="edition-price" style="color: var(--rose)"
+                  >$15.99</span
+                >
+              </div>
+              <!-- <div class="edition-isbn">ISBN 9789347195389</div> -->
+              <div class="edition-includes">
+                ✓ 216-page volume<br />
+                ✓ Exclusive Shikishi art board<br />
+                ✓ Never-released English-release art
+              </div>
+              <a
+                href="#"
+                class="btn-buy-ed ltd"
+                onclick="
+                  handleBuyPrint('limited');
+                  return false;
+                "
+                >Order Limited →</a
+              >
+            </div>
+          </div>
+
+          <!-- E-book nudge -->
+          <div
+            style="
+              background: var(--ink-card);
+              border: 1px solid var(--border-s);
+              border-radius: var(--r-lg);
+              padding: 16px 20px;
+              font-family: var(--font-b);
+              font-size: 12px;
+              color: var(--cream-soft);
+              line-height: 1.6;
+            "
+          >
+            <strong
+              style="color: var(--gold); display: block; margin-bottom: 4px"
+              >Prefer to read digitally?</strong
+            >
+            The e-book is available on Crossed Hearts and major platforms for
+            <strong style="color: var(--gold-lt)">$6.99</strong>. <br /><a
+              href="allrounder-vol2.html"
+              style="
+                color: var(--gold-lt);
+                text-decoration: underline;
+                margin-top: 8px;
+                display: inline-block;
+              "
+              >View digital edition →</a
+            >
+          </div>
+        </div>
+        <!-- /title-right -->
+      </div>
+      <!-- /title-layout -->
+    </div>
+    <!-- /title-page-wrap -->
+
+    <!-- AUTH MODAL -->
+    <div class="modal-overlay" id="authOverlay" onclick="closeAuthIfBg(event)">
+      <div class="modal">
+        <button class="modal-x" onclick="closeAuth()">✕</button>
+        <div class="modal-title">Welcome Back</div>
+        <div class="modal-sub">Sign in to access your digital library</div>
+        <div class="auth-tabs">
+          <button class="atab active" onclick="switchAuth('in', this)">
+            Sign In
+          </button>
+          <button class="atab" onclick="switchAuth('up', this)">
+            Create Account
+          </button>
+        </div>
+        <div id="authBody"></div>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <!-- NAV SEARCH OVERLAY -->
+    <div
+      class="nav-search-overlay"
+      id="navSearchOverlay"
+      onclick="closeNavSearchIfBg(event)"
+    >
+      <div class="nav-search-modal">
+        <button
+          class="nav-search-close"
+          onclick="closeNavSearch()"
+          aria-label="Close search"
+        >
+          &#10005;
+        </button>
+        <div class="nav-search-inner" id="navSiteSearchBar">
+          <span class="nav-search-icon">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </span>
+          <input
+            type="text"
+            class="nav-search-input"
+            id="navSearchInput"
+            placeholder="Search titles..."
+            oninput="navLiveSearch(this.value)"
+            onkeydown="if (event.key === 'Enter') navDoSearch();"
+            autocomplete="off"
+          />
+          <button
+            class="nav-search-clear"
+            id="navSearchClear"
+            onclick="navClearSearch()"
+            style="display: none"
+          >
+            &#10005;
+          </button>
+          <button class="nav-search-submit" onclick="navDoSearch()">
+            Search
+          </button>
+        </div>
+        <div class="nav-search-suggestions" id="navSearchSuggestions"></div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      renderAuthForm("in");
+
+      function handleBuyPrint(edition) {
+        const isSignedIn = false; // integrate with auth state
+        if (!isSignedIn) {
+          openAuth();
+          return;
+        }
+        showToast("Redirecting to order page…");
+      }
+
+      (function () {
+        if (localStorage.getItem("ch-theme") === "light")
+          document.body.classList.add("light-mode");
+      })();
+      function toggleTheme() {
+        const l = document.body.classList.toggle("light-mode");
+        localStorage.setItem("ch-theme", l ? "light" : "dark");
+      }
+
+      function openNavSearch() {
+        document.getElementById("navSearchOverlay").classList.add("open");
+        setTimeout(() => document.getElementById("navSearchInput").focus(), 80);
+      }
+      function closeNavSearch() {
+        document.getElementById("navSearchOverlay").classList.remove("open");
+        navClearSearch();
+      }
+      function closeNavSearchIfBg(e) {
+        if (e.target === e.currentTarget) closeNavSearch();
+      }
+      function navDoSearch() {
+        const v = document.getElementById("navSearchInput").value.trim();
+        if (v) window.location.href = "search.html?q=" + encodeURIComponent(v);
+      }
+      function navClearSearch() {
+        const i = document.getElementById("navSearchInput"),
+          b = document.getElementById("navSearchSuggestions"),
+          c = document.getElementById("navSearchClear");
+        if (i) i.value = "";
+        if (b) {
+          b.innerHTML = "";
+          b.classList.remove("open");
+        }
+        if (c) c.style.display = "none";
+        i && i.focus();
+      }
+      function navLiveSearch(val) {
+        const box = document.getElementById("navSearchSuggestions"),
+          cl = document.getElementById("navSearchClear");
+        if (!box) return;
+        if (cl) cl.style.display = val ? "" : "none";
+        const q = val.trim().toLowerCase();
+        if (!q) {
+          box.innerHTML = "";
+          box.classList.remove("open");
+          return;
+        }
+        box.classList.add("open");
+        box.innerHTML =
+          '<div class="nav-suggestion-empty">Press Search to explore</div>';
+      }
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeNavSearch();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reader — Crossed Hearts Licenser Portal</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+      body {
+        background: #0c0c0c;
+      }
+
+      .read-progress {
+        position: fixed;
+        top: var(--nav-h);
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--border-s);
+        z-index: 200;
+      }
+      .read-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--gold), var(--rose));
+        transition: width 0.4s ease;
+        width: 0%;
+      }
+
+      .reader-topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+        min-width: 0;
+      }
+      .reader-topbar-center {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .reader-topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+
+      .lic-timer-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--ink-mid);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.06em;
+        user-select: none;
+        transition: border-color 0.3s;
+      }
+      .lic-timer-pill.warning {
+        border-color: rgba(214, 140, 60, 0.5);
+      }
+      .lic-timer-pill.danger {
+        border-color: rgba(196, 100, 122, 0.6);
+      }
+      .lic-timer-dot {
+        width: 5px;
+        height: 5px;
+        background: #4caf76;
+        border-radius: 50%;
+        flex-shrink: 0;
+        animation: licPulse 2s ease infinite;
+      }
+      .lic-timer-dot.warning {
+        background: #d6965a;
+      }
+      .lic-timer-dot.danger {
+        background: var(--rose);
+      }
+      @keyframes licPulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+      #licTimerDisplay {
+        color: var(--cream);
+        font-weight: 500;
+      }
+
+      .lic-page-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-s);
+        color: var(--muted);
+        width: 30px;
+        height: 30px;
+        border-radius: var(--r);
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+      .lic-page-btn:hover:not(:disabled) {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+      .lic-page-btn:disabled {
+        opacity: 0.28;
+        cursor: not-allowed;
+      }
+
+      .zoom-controls {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .zoom-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-s);
+        color: var(--muted);
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: var(--r);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .zoom-btn:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+      .zoom-label {
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.06em;
+        min-width: 36px;
+        text-align: center;
+      }
+
+      .lic-reader-body {
+        min-height: calc(100vh - var(--nav-h) - 52px);
+        padding: 32px 20px 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .lic-pdf-wrap {
+        position: relative;
+        display: inline-block;
+        box-shadow: 0 8px 48px rgba(0, 0, 0, 0.75);
+        border: 1px solid rgba(201, 168, 76, 0.06);
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      #licPdfCanvas {
+        display: block;
+        max-width: 100%;
+      }
+
+      .lic-watermark {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 10;
+        overflow: hidden;
+      }
+      .lic-wm-tile {
+        position: absolute;
+        transform: rotate(-35deg);
+        transform-origin: center;
+        pointer-events: none;
+        font-family: var(--font-b);
+        font-size: 11px;
+        font-weight: 400;
+        color: rgba(201, 168, 76, 0.11);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        line-height: 2;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .lic-loader {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        padding: 100px 24px;
+        color: var(--muted);
+      }
+      .lic-spin {
+        width: 28px;
+        height: 28px;
+        border: 2px solid var(--border-s);
+        border-top-color: var(--gold);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .lic-loader-txt {
+        font-size: 11px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .lic-error {
+        display: none;
+        text-align: center;
+        padding: 80px 24px;
+      }
+      .lic-error h3 {
+        font-family: var(--font-d);
+        font-size: 24px;
+        color: var(--cream);
+        margin: 12px 0 8px;
+      }
+      .lic-error p {
+        font-family: var(--font-s);
+        font-size: 15px;
+        color: var(--cream-soft);
+        margin-bottom: 20px;
+      }
+
+      @media print {
+        body {
+          display: none !important;
+        }
+      }
+      @media (max-width: 900px) {
+        .reader-topbar {
+          padding: 8px 16px;
+          gap: 6px;
+        }
+        .reader-title {
+          max-width: 160px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+      @media (max-width: 768px) {
+        .zoom-controls {
+          display: none;
+        }
+        .reader-ch {
+          display: none;
+        }
+        .lic-timer-pill {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body class="page-body">
+    <nav class="nav" id="mainNav">
+      <a class="nav-logo" href="licenser-portal.html">
+        <span class="nav-logo-main">Crossed Hearts</span>
+        <span class="nav-logo-sub">Licenser Portal</span>
+      </a>
+      <div class="nav-actions">
+        <button
+          class="theme-toggle"
+          id="themeToggle"
+          onclick="toggleTheme()"
+          aria-label="Toggle theme"
+        >
+          <span class="icon-dark">🌙</span>
+          <span class="icon-light">☀️</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="read-progress">
+      <div class="read-progress-fill" id="licProgress"></div>
+    </div>
+
+    <div class="reader-topbar">
+      <div class="reader-topbar-left">
+        <button class="btn-reader" onclick="history.back()">← Portal</button>
+        <div class="reader-info">
+          <span class="reader-title" id="licReaderTitle">Loading…</span>
+          <span class="reader-ch" id="licReaderBadge">Licenser Review</span>
+        </div>
+      </div>
+      <div class="reader-topbar-center">
+        <button
+          class="lic-page-btn"
+          id="licPrevBtn"
+          onclick="licChangePage(-1)"
+          disabled
+        >
+          ‹
+        </button>
+        <span
+          class="reader-ch"
+          id="licPageInd"
+          style="min-width: 60px; text-align: center"
+          >— / —</span
+        >
+        <button
+          class="lic-page-btn"
+          id="licNextBtn"
+          onclick="licChangePage(1)"
+          disabled
+        >
+          ›
+        </button>
+      </div>
+      <div class="reader-topbar-right">
+        <div class="zoom-controls">
+          <button class="zoom-btn" onclick="licZoom(-0.15)">−</button>
+          <div class="zoom-label" id="licZoomLbl">100%</div>
+          <button class="zoom-btn" onclick="licZoom(0.15)">+</button>
+        </div>
+        <div class="lic-timer-pill" id="licTimerPill">
+          <div class="lic-timer-dot" id="licTimerDot"></div>
+          <span id="licTimerDisplay">--:--</span>
+        </div>
+        <span
+          style="
+            font-size: 9px;
+            color: var(--muted);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            opacity: 0.6;
+          "
+          >Read-only</span
+        >
+        <button
+          class="btn-reader"
+          onclick="licSignOut()"
+          style="border-color: rgba(196, 100, 122, 0.35); color: var(--rose)"
+        >
+          Sign Out
+        </button>
+      </div>
+    </div>
+
+    <div class="lic-reader-body" id="licReaderBody">
+      <div class="lic-loader" id="licLoader">
+        <div class="lic-spin"></div>
+        <span class="lic-loader-txt">Loading volume…</span>
+      </div>
+
+      <div class="lic-error" id="licError">
+        <div style="font-size: 40px">⊘</div>
+        <h3>Cannot Load Volume</h3>
+        <p>The file may not be available or your session expired.</p>
+        <a
+          href="licenser-portal.html"
+          class="btn-gold"
+          style="display: inline-block"
+          >← Back to Portal</a
+        >
+      </div>
+
+      <div class="lic-pdf-wrap" id="licPdfWrap" style="display: none">
+        <canvas id="licPdfCanvas"></canvas>
+        <div class="lic-watermark" id="licWatermark"></div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="licTimeoutModal">
+      <div class="modal" style="max-width: 420px; text-align: center">
+        <div style="font-size: 40px; margin-bottom: 16px">⏱</div>
+        <div class="modal-title" style="color: var(--rose)">
+          Session Expired
+        </div>
+        <div
+          class="modal-sub"
+          style="
+            font-family: var(--font-s);
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--cream-soft);
+            margin-bottom: 24px;
+          "
+        >
+          Your licenser session has ended for security. Please sign in again.
+        </div>
+        <button class="btn-gold btn-full" onclick="licSignOut()">
+          Return to Site →
+        </button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+    <script>
+      // ── Config ──
+      const LIC_TIMEOUT_MIN = 30;
+
+      const LIC_PDF_MAP = {
+        "chigaya-vol1": "assets/sample.pdf",
+        "chigaya-vol2": "assets/sample.pdf",
+        "executioner-vol1": "assets/sample.pdf",
+        "executioner-vol2": "assets/sample.pdf",
+        "matchmaker-vol1": "assets/sample.pdf",
+        "allrounder-vol1": "assets/sample.pdf",
+        "allrounder-vol2": "assets/sample.pdf",
+        borrowing: "assets/sample.pdf",
+        timeisa: "assets/sample.pdf",
+        afternoon: "assets/sample.pdf",
+        gaze: "assets/sample.pdf",
+        until: "assets/sample.pdf",
+        theking: "assets/sample.pdf",
+        thebird: "assets/sample.pdf",
+        "room-vol1": "assets/sample.pdf",
+        "room-vol2": "assets/sample.pdf",
+        "abandonedvillainess-vol1": "assets/sample.pdf",
+        "abandonedvillainess-vol2": "assets/sample.pdf",
+        "whyraeliana-vol1": "assets/sample.pdf",
+        "whyraeliana-vol2": "assets/sample.pdf",
+      };
+
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+      // ── Guard ──
+      if (!licGuard()) {
+        /* redirects */
+      }
+
+      // ── Theme ──
+      (function () {
+        if (localStorage.getItem("ch-theme") === "light")
+          document.body.classList.add("light-mode");
+      })();
+      function toggleTheme() {
+        const l = document.body.classList.toggle("light-mode");
+        localStorage.setItem("ch-theme", l ? "light" : "dark");
+      }
+
+      // ── Security: block all download shortcuts ──
+      document.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        showToast("Right-click is disabled in licenser review.", "error");
+      });
+      document.addEventListener("keydown", (e) => {
+        const ctrl = e.ctrlKey || e.metaKey;
+        if (e.key === "F12") {
+          e.preventDefault();
+          return;
+        }
+        if (
+          ctrl &&
+          e.shiftKey &&
+          ["i", "I", "j", "J", "c", "C"].includes(e.key)
+        ) {
+          e.preventDefault();
+          return;
+        }
+        if (ctrl && ["s", "p", "u", "a"].includes(e.key.toLowerCase())) {
+          e.preventDefault();
+          if (e.key.toLowerCase() === "p")
+            showToast("Printing is disabled for licenser review.", "error");
+          return;
+        }
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+          e.preventDefault();
+          licChangePage(1);
+        }
+        if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+          e.preventDefault();
+          licChangePage(-1);
+        }
+      });
+      document.addEventListener("dragstart", (e) => e.preventDefault());
+      document.addEventListener("copy", (e) => e.preventDefault());
+
+      // ── Timer ──
+      let licTimeLeft = LIC_TIMEOUT_MIN * 60,
+        licCountdown = null;
+
+      function licUpdateTimer() {
+        const m = Math.floor(licTimeLeft / 60),
+          s = licTimeLeft % 60;
+        document.getElementById("licTimerDisplay").textContent =
+          String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+        const pill = document.getElementById("licTimerPill");
+        const dot = document.getElementById("licTimerDot");
+        pill.className = "lic-timer-pill";
+        dot.className = "lic-timer-dot";
+        if (licTimeLeft <= 60) {
+          pill.classList.add("danger");
+          dot.classList.add("danger");
+        } else if (licTimeLeft <= 300) {
+          pill.classList.add("warning");
+          dot.classList.add("warning");
+        }
+      }
+      function licResetTimer() {
+        licTimeLeft = LIC_TIMEOUT_MIN * 60;
+        licUpdateTimer();
+      }
+
+      licUpdateTimer();
+      licCountdown = setInterval(() => {
+        licTimeLeft--;
+        licUpdateTimer();
+        if (licTimeLeft <= 0) {
+          clearInterval(licCountdown);
+          document.getElementById("licTimeoutModal").classList.add("open");
+        }
+      }, 1000);
+      ["mousemove", "keydown", "click", "scroll", "touchstart"].forEach((ev) =>
+        document.addEventListener(ev, licResetTimer, { passive: true }),
+      );
+
+      // ── Watermark ──
+      function buildWatermark(licenserId) {
+        const overlay = document.getElementById("licWatermark");
+        const l1 = "CONFIDENTIAL · " + licenserId;
+        const l2 = "CROSSED HEARTS · REVIEW COPY · DO NOT DISTRIBUTE";
+        let html = "";
+        for (let row = 0; row < 14; row++) {
+          for (let col = 0; col < 5; col++) {
+            html +=
+              '<div class="lic-wm-tile" style="top:' +
+              (row * 110 - 180) +
+              "px;left:" +
+              (col * 300 - 80) +
+              'px">' +
+              l1 +
+              "<br>" +
+              l2 +
+              "</div>";
+          }
+        }
+        overlay.innerHTML = html;
+      }
+
+      // ── PDF State ──
+      let licPdfDoc = null,
+        licCurPage = 1,
+        licTotalPages = 0,
+        licScale = 1.4;
+
+      async function licRenderPage(num) {
+        const canvas = document.getElementById("licPdfCanvas");
+        const ctx = canvas.getContext("2d");
+        const page = await licPdfDoc.getPage(num);
+        const vp = page.getViewport({ scale: licScale });
+        canvas.width = vp.width;
+        canvas.height = vp.height;
+        await page.render({ canvasContext: ctx, viewport: vp }).promise;
+        licCurPage = num;
+        document.getElementById("licPageInd").textContent =
+          licCurPage + " / " + licTotalPages;
+        document.getElementById("licPrevBtn").disabled = licCurPage <= 1;
+        document.getElementById("licNextBtn").disabled =
+          licCurPage >= licTotalPages;
+        document.getElementById("licProgress").style.width =
+          (licCurPage / licTotalPages) * 100 + "%";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      async function licChangePage(d) {
+        const t = licCurPage + d;
+        if (t < 1 || t > licTotalPages) return;
+        await licRenderPage(t);
+      }
+
+      async function licZoom(d) {
+        licScale = Math.max(0.6, Math.min(3.0, licScale + d));
+        document.getElementById("licZoomLbl").textContent =
+          Math.round((licScale / 1.4) * 100) + "%";
+        if (licPdfDoc) await licRenderPage(licCurPage);
+      }
+
+      // ── Init ──
+      (async function init() {
+        const params = new URLSearchParams(window.location.search);
+        const volId = params.get("vol") || "";
+
+        let volTitle = volId;
+        try {
+          const raw = sessionStorage.getItem("lic_vol");
+          if (raw) {
+            const v = JSON.parse(raw);
+            volTitle = v.title || volId;
+          }
+        } catch (e) {}
+
+        document.getElementById("licReaderTitle").textContent = volTitle;
+        document.getElementById("licReaderBadge").textContent =
+          "Licenser: " + (CH_LICENSER?.id || "—");
+        document.title = volTitle + " — Crossed Hearts Licenser";
+
+        if (CH_LICENSER) buildWatermark(CH_LICENSER.id);
+
+        const pdfUrl = LIC_PDF_MAP[volId] || "assets/sample.pdf";
+
+        const loader = document.getElementById("licLoader");
+        const wrap = document.getElementById("licPdfWrap");
+        const errEl = document.getElementById("licError");
+
+        try {
+          const task = pdfjsLib.getDocument(pdfUrl);
+          licPdfDoc = await task.promise;
+          licTotalPages = licPdfDoc.numPages;
+
+          loader.style.display = "none";
+          wrap.style.display = "inline-block";
+          document.getElementById("licNextBtn").disabled = licTotalPages <= 1;
+          await licRenderPage(1);
+        } catch (err) {
+          loader.style.display = "none";
+          errEl.style.display = "block";
+        }
+      })();
+    </script>
+  </body>
+</html>

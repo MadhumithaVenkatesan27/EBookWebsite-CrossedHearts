@@ -1,0 +1,2216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reader - Crossed Hearts Digital Library</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+      /* ── Base ─────────────────────────────────────────────────────────────── */
+      body {
+        background: #0c0c0c;
+      }
+
+      /* ── Read progress bar ────────────────────────────────────────────────── */
+      .read-progress {
+        position: fixed;
+        top: var(--nav-h);
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--border-s);
+        z-index: 200;
+      }
+      .read-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--gold), var(--rose));
+        transition: width 0.3s ease;
+        width: 0%;
+      }
+
+      /* ── Shared setting buttons ───────────────────────────────────────────── */
+      .setting-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-s);
+        color: var(--muted);
+        padding: 6px 12px;
+        font-size: 11px;
+        cursor: pointer;
+        border-radius: var(--r);
+        transition: all 0.2s;
+        font-family: var(--font-b);
+        letter-spacing: 0.1em;
+      }
+      .setting-btn:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+      .setting-btn.active {
+        background: var(--gold-dim);
+        color: var(--gold);
+        border-color: var(--border);
+      }
+
+      /* ── Zoom controls ────────────────────────────────────────────────────── */
+      .zoom-controls {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .zoom-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-s);
+        color: var(--muted);
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: var(--r);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .zoom-btn:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+      .zoom-label {
+        font-size: 11px;
+        color: var(--muted);
+        min-width: 36px;
+        text-align: center;
+      }
+
+      /* ── Vertical scroll reader ───────────────────────────────────────────── */
+      .reader-pages {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 32px 16px 80px;
+      }
+      .reader-pages.narrow {
+        max-width: 600px;
+      }
+      .reader-pages.wide {
+        max-width: 1400px;
+      }
+
+      /* ── Double page pair layout (vertical) ──────────────────────────────── */
+      .double-pair {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 6px;
+        justify-content: center;
+        align-items: flex-start;
+      }
+      .double-pair .pdf-page-wrap {
+        flex: 1;
+        margin-bottom: 0;
+      }
+
+      /* ── PDF page wrappers (vertical mode) ───────────────────────────────── */
+      .pdf-page-wrap {
+        position: relative;
+        margin-bottom: 6px;
+        border-radius: 2px;
+        overflow: hidden;
+        background: #1a1a1a;
+        line-height: 0;
+      }
+      .pdf-page-wrap::after {
+        content: "CROSSED HEARTS - LICENSED COPY - THECROSSEDHEARTS.COM";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-28deg);
+        font-family: var(--font-b);
+        font-size: 13px;
+        letter-spacing: 0.35em;
+        color: rgba(255, 255, 255, 0.045);
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 10;
+        user-select: none;
+      }
+      .pdf-page-wrap .page-shield {
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        background: transparent;
+        cursor: default;
+      }
+      .pdf-page-wrap canvas {
+        width: 100% !important;
+        height: auto !important;
+        display: block;
+        pointer-events: none;
+      }
+
+      /* ── Skeleton shimmer ─────────────────────────────────────────────────── */
+      .pdf-page-skeleton {
+        width: 100%;
+        aspect-ratio: 0.707;
+        background: linear-gradient(
+          90deg,
+          #1a1a1a 25%,
+          #242424 50%,
+          #1a1a1a 75%
+        );
+        background-size: 200% 100%;
+        animation: skeleton-shimmer 1.5s infinite;
+        border-radius: 2px;
+      }
+      @keyframes skeleton-shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      /* ── Vertical page indicator ──────────────────────────────────────────── */
+      .page-indicator {
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(8, 5, 8, 0.9);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 6px 18px;
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.12em;
+        z-index: 100;
+        pointer-events: none;
+        backdrop-filter: blur(8px);
+        transition: opacity 0.2s;
+      }
+      .page-indicator.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* ── Vertical arrow buttons ──────────────────────────────────────────────── */
+      .vert-arrow-btn {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 120;
+        width: 48px;
+        height: 48px;
+        background: rgba(14, 9, 14, 0.85);
+        border: 1px solid rgba(201, 168, 76, 0.25);
+        border-radius: 50%;
+        color: rgba(201, 168, 76, 0.7);
+        font-size: 22px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          background 0.2s,
+          color 0.2s,
+          border-color 0.2s,
+          opacity 0.2s;
+        backdrop-filter: blur(8px);
+        line-height: 1;
+        pointer-events: auto;
+      }
+      .vert-arrow-btn:hover {
+        background: rgba(201, 168, 76, 0.14);
+        border-color: rgba(201, 168, 76, 0.7);
+        color: #c9a84c;
+      }
+      .vert-arrow-btn.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #vertPrevBtn {
+        bottom: 82px;
+      }
+      #vertNextBtn {
+        bottom: 24px;
+      }
+
+      /* ── Loading spinner ──────────────────────────────────────────────────── */
+      .pdf-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 24px;
+        gap: 20px;
+        color: var(--muted);
+        font-family: var(--font-s);
+        font-size: 16px;
+      }
+      .pdf-loading-ring {
+        width: 48px;
+        height: 48px;
+        border: 3px solid var(--border-s);
+        border-top-color: var(--gold);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ── End-of-chapter card ──────────────────────────────────────────────── */
+      .reader-end {
+        background: var(--ink-card);
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        padding: 48px;
+        text-align: center;
+        margin-top: 24px;
+      }
+      .reader-end h3 {
+        font-family: var(--font-d);
+        font-size: 26px;
+        color: var(--cream);
+        margin-bottom: 8px;
+      }
+      .reader-end p {
+        font-family: var(--font-s);
+        font-size: 16px;
+        color: var(--cream-soft);
+        margin-bottom: 24px;
+      }
+
+      /* ── Error state ──────────────────────────────────────────────────────── */
+      .pdf-error {
+        text-align: center;
+        padding: 60px 24px;
+      }
+      .pdf-error h3 {
+        font-family: var(--font-d);
+        font-size: 24px;
+        color: var(--rose);
+        margin-bottom: 12px;
+      }
+      .pdf-error p {
+        font-family: var(--font-s);
+        font-size: 15px;
+        color: var(--muted);
+        margin-bottom: 24px;
+      }
+
+      /* ══════════════════════════════════════════════════════════════════════
+         HORIZONTAL VIEWER
+         ══════════════════════════════════════════════════════════════════════ */
+
+      #horizViewer {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #0c0c0c;
+        z-index: 50;
+        overflow: hidden;
+        user-select: none;
+        flex-direction: column;
+      }
+      #horizViewer.active {
+        display: flex;
+      }
+
+      /* Track — the clip container */
+      #horizTrack {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        overflow-x: hidden;
+        overflow-y: auto;
+        position: relative;
+        cursor: grab;
+      }
+      #horizTrack.dragging {
+        cursor: grabbing;
+      }
+
+      /* Strip — all slides in a row, moved via translateX */
+      #horizStrip {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        transition: transform 220ms ease-out;
+        will-change: transform;
+      }
+      #horizStrip.no-transition {
+        transition: none;
+      }
+
+      /* One slide = 100vw wide */
+      .horiz-slide {
+        flex: 0 0 100vw;
+        width: 100vw;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 64px;
+        box-sizing: border-box;
+      }
+
+      /* Page wrapper inside a slide — height is auto from canvas */
+      .horiz-page-wrap {
+        position: relative;
+        flex: 0 0 auto;
+        line-height: 0;
+        border-radius: 2px;
+        overflow: hidden;
+        background: #1a1a1a;
+        box-shadow: 0 8px 48px rgba(0, 0, 0, 0.85);
+      }
+      .horiz-page-wrap::after {
+        content: "CROSSED HEARTS - LICENSED COPY - THECROSSEDHEARTS.COM";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-28deg);
+        font-size: 12px;
+        letter-spacing: 0.3em;
+        color: rgba(255, 255, 255, 0.045);
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 10;
+        user-select: none;
+      }
+      .horiz-page-wrap .page-shield {
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        background: transparent;
+        cursor: default;
+      }
+      .horiz-page-wrap canvas {
+        display: block;
+        pointer-events: none;
+        /* width/height set via JS to match rendered canvas — no CSS override */
+      }
+      .horiz-page-wrap .pdf-page-skeleton {
+        background: linear-gradient(
+          90deg,
+          #1a1a1a 25%,
+          #242424 50%,
+          #1a1a1a 75%
+        );
+        background-size: 200% 100%;
+        animation: skeleton-shimmer 1.5s infinite;
+      }
+
+      /* ── Bottom-center horiz arrow buttons (mirrors .vert-arrow-btn) ─────── */
+      .horiz-bc-btn {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 120;
+        width: 48px;
+        height: 48px;
+        background: rgba(14, 9, 14, 0.85);
+        border: 1px solid rgba(201, 168, 76, 0.25);
+        border-radius: 50%;
+        color: rgba(201, 168, 76, 0.7);
+        font-size: 22px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          background 0.2s,
+          color 0.2s,
+          border-color 0.2s,
+          opacity 0.2s;
+        backdrop-filter: blur(8px);
+        line-height: 1;
+        pointer-events: auto;
+      }
+      .horiz-bc-btn:hover {
+        background: rgba(201, 168, 76, 0.14);
+        border-color: rgba(201, 168, 76, 0.7);
+        color: #c9a84c;
+      }
+      .horiz-bc-btn.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #horizPrevBc {
+        bottom: 82px;
+      }
+      #horizNextBc {
+        bottom: 24px;
+      }
+
+      /* ── Dot / text indicator at bottom of horiz viewer ──────────────────── */
+      #horizIndicator {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 0 16px;
+        z-index: 60;
+        pointer-events: none;
+        min-height: 40px;
+      }
+      #horizDots {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .hdot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.25);
+        transition: all 0.2s;
+        flex: 0 0 auto;
+      }
+      .hdot.active {
+        background: #c9a84c;
+        transform: scale(1.4);
+      }
+      #horizCounter {
+        display: none;
+        background: rgba(8, 5, 8, 0.88);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        padding: 5px 16px;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.55);
+        letter-spacing: 0.12em;
+        backdrop-filter: blur(8px);
+      }
+    </style>
+  </head>
+  <body class="reader-active">
+    <!-- ── Nav ──────────────────────────────────────────────────────────────── -->
+    <nav class="nav">
+      <a class="nav-logo" href="index.html">
+        <span class="nav-logo-main">Crossed Hearts</span>
+        <span class="nav-logo-sub">Digital Library</span>
+      </a>
+      <div class="nav-actions">
+        <button class="btn-nav-ghost" onclick="goBack()">← Exit Reader</button>
+        <a
+          href="cart.html"
+          style="
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            background: var(--gold-dim);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            color: var(--gold);
+            text-decoration: none;
+            transition: all 0.22s;
+            flex-shrink: 0;
+          "
+          onmouseover="
+            this.style.background = 'var(--gold)';
+            this.style.color = 'var(--ink)';
+          "
+          onmouseout="
+            this.style.background = 'var(--gold-dim)';
+            this.style.color = 'var(--gold)';
+          "
+          title="Cart"
+          aria-label="Cart"
+        >
+          <svg
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 01-8 0" />
+          </svg>
+          <span
+            class="ch-cart-badge"
+            style="
+              display: none;
+              position: absolute;
+              top: -5px;
+              right: -6px;
+              background: var(--rose);
+              color: #fff;
+              font-size: 9px;
+              font-weight: 700;
+              font-family: var(--font-b);
+              width: 16px;
+              height: 16px;
+              border-radius: 50%;
+              align-items: center;
+              justify-content: center;
+            "
+            >0</span
+          >
+        </a>
+        <a href="my-library.html" class="btn-nav-ghost">My Library</a>
+        <button
+          class="btn-nav-signin"
+          onclick="openLicenserAuth()"
+          style="
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--border);
+            margin-left: 4px;
+          "
+          onmouseover="this.style.background = 'var(--gold-dim)'"
+          onmouseout="this.style.background = 'transparent'"
+        >
+          Licenser
+        </button>
+      </div>
+    </nav>
+
+    <!-- ── Progress bar ─────────────────────────────────────────────────────── -->
+    <div class="read-progress">
+      <div class="read-progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- ── Top control bar ──────────────────────────────────────────────────── -->
+    <div
+      class="reader-topbar"
+      id="readerTopbar"
+      style="top: calc(var(--nav-h) + 3px)"
+    >
+      <div class="reader-info">
+        <button class="btn-reader" onclick="goBack()">← Back</button>
+        <span class="reader-title" id="readerTitle">Loading…</span>
+        <span class="reader-ch" id="readerCh">-</span>
+      </div>
+
+      <!-- 4-MODE VIEW SELECTOR -->
+      <div class="view-mode-group" id="viewModeGroup">
+        <button
+          class="view-mode-btn active"
+          id="vmSingleV"
+          onclick="setViewMode('single-vert', this)"
+          title="Single page · Vertical scroll"
+        >
+          <svg width="14" height="18" viewBox="0 0 14 18">
+            <rect
+              x="2"
+              y="1"
+              width="10"
+              height="16"
+              rx="1"
+              fill="currentColor"
+              opacity=".9"
+            />
+          </svg>
+          <span>Single<br /><small>Vertical</small></span>
+        </button>
+        <button
+          class="view-mode-btn"
+          id="vmDoubleV"
+          onclick="setViewMode('double-vert', this)"
+          title="Double page · Vertical scroll"
+        >
+          <svg width="20" height="18" viewBox="0 0 20 18">
+            <rect
+              x="1"
+              y="1"
+              width="8"
+              height="16"
+              rx="1"
+              fill="currentColor"
+              opacity=".9"
+            />
+            <rect
+              x="11"
+              y="1"
+              width="8"
+              height="16"
+              rx="1"
+              fill="currentColor"
+              opacity=".7"
+            />
+          </svg>
+          <span>Double<br /><small>Vertical</small></span>
+        </button>
+        <button
+          class="view-mode-btn"
+          id="vmSingleH"
+          onclick="setViewMode('single-horiz', this)"
+          title="Single page · Horizontal"
+        >
+          <svg width="20" height="18" viewBox="0 0 20 18">
+            <rect
+              x="5"
+              y="1"
+              width="10"
+              height="16"
+              rx="1"
+              fill="currentColor"
+              opacity=".9"
+            />
+            <path
+              d="M1 9h3M16 9h3"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+          <span>Single<br /><small>Horizontal</small></span>
+        </button>
+        <button
+          class="view-mode-btn"
+          id="vmDoubleH"
+          onclick="setViewMode('double-horiz', this)"
+          title="Double page · Horizontal"
+        >
+          <svg width="24" height="18" viewBox="0 0 24 18">
+            <rect
+              x="2"
+              y="1"
+              width="8"
+              height="16"
+              rx="1"
+              fill="currentColor"
+              opacity=".9"
+            />
+            <rect
+              x="14"
+              y="1"
+              width="8"
+              height="16"
+              rx="1"
+              fill="currentColor"
+              opacity=".7"
+            />
+            <path
+              d="M0 9h1.5M22.5 9h1.5"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+          <span>Double<br /><small>Horizontal</small></span>
+        </button>
+      </div>
+
+      <div class="zoom-controls">
+        <button class="zoom-btn" onclick="changeZoom(-0.1)">&#8722;</button>
+        <span class="zoom-label" id="zoomLabel">100%</span>
+        <button class="zoom-btn" onclick="changeZoom(0.1)">&#43;</button>
+      </div>
+
+      <div class="reader-nav-btns">
+        <button class="btn-reader" id="prevBtn" onclick="changeChapter(-1)">
+          ← Prev
+        </button>
+        <button class="btn-reader" id="nextBtn" onclick="changeChapter(1)">
+          Next →
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Vertical page indicator ───────────────────────────────────────────── -->
+    <div class="page-indicator" id="pageIndicator">Loading…</div>
+
+    <!-- ── Vertical navigation arrows ──────────────────────────────────────── -->
+    <button
+      class="vert-arrow-btn hidden"
+      id="vertPrevBtn"
+      onclick="vertNav(-1)"
+      title="Previous page"
+    >
+      &#8593;
+    </button>
+    <button
+      class="vert-arrow-btn"
+      id="vertNextBtn"
+      onclick="vertNav(1)"
+      title="Next page"
+    >
+      &#8595;
+    </button>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         HORIZONTAL VIEWER OVERLAY
+         ══════════════════════════════════════════════════════════════════════ -->
+    <div id="horizViewer">
+      <div id="horizTrack">
+        <div id="horizStrip"></div>
+        <button
+          class="horiz-bc-btn hidden"
+          id="horizPrevBc"
+          onclick="horizNav(-1)"
+          title="Previous page"
+        >
+          &#8592;
+        </button>
+        <button
+          class="horiz-bc-btn"
+          id="horizNextBc"
+          onclick="horizNav(1)"
+          title="Next page"
+        >
+          &#8594;
+        </button>
+      </div>
+      <div id="horizIndicator">
+        <div id="horizDots"></div>
+        <div id="horizCounter"></div>
+      </div>
+    </div>
+
+    <!-- ── Vertical scroll reader ───────────────────────────────────────────── -->
+    <div class="reader-wrap" style="padding-top: 0">
+      <div class="reader-pages" id="readerPages">
+        <div class="pdf-loading">
+          <div class="pdf-loading-ring"></div>
+          <span>Loading your chapter…</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Modals ─────────────────────────────────────────────────────────── -->
+    <div
+      class="modal-overlay"
+      id="payOverlay"
+      onclick="if (event.target === this) closePayModal();"
+    >
+      <div class="modal">
+        <button class="modal-x" onclick="closePayModal()">✕</button>
+        <div class="modal-title" id="payModalTitle">Unlock Chapter</div>
+        <div class="modal-sub" id="payModalSub">
+          Purchase to continue reading
+        </div>
+        <div id="payBody"></div>
+      </div>
+    </div>
+    <div class="modal-overlay" id="authOverlay" onclick="closeAuthIfBg(event)">
+      <div class="modal">
+        <button class="modal-x" onclick="closeAuth()">✕</button>
+        <div class="modal-title">Sign In to Continue</div>
+        <div class="modal-sub">Create an account or sign in to read</div>
+        <div class="auth-tabs">
+          <button class="atab active" onclick="switchAuth('in', this)">
+            Sign In
+          </button>
+          <button class="atab" onclick="switchAuth('up', this)">
+            Create Account
+          </button>
+        </div>
+        <div id="authBody"></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+    <script>
+      "use strict";
+
+      // ── PDF.js worker ──────────────────────────────────────────────────────────
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+      // ══════════════════════════════════════════════════════════════════════════
+      // TITLE & CHAPTER DATA
+      // ══════════════════════════════════════════════════════════════════════════
+      const READER_DATA = {
+        "chigaya-v1": {
+          title: "You're Way Too Cheeky, Chigaya-kun! Vol.1",
+          backUrl: "chigaya-vol1.html",
+          volumePrice: 7.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch4",
+              label: "Chapter 4 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        "chigaya-v2": {
+          title: "You're Way Too Cheeky, Chigaya-kun! Vol.2",
+          backUrl: "chigaya-vol2.html",
+          volumePrice: 7.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch4",
+              label: "Chapter 4 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        "grenimal-v1": {
+          title: "The Executioner of Grenimal Vol.1",
+          backUrl: "executioner-vol1.html",
+          volumePrice: 7.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        "grenimal-v2": {
+          title: "The Executioner of Grenimal Vol.2",
+          backUrl: "executioner-vol2.html",
+          volumePrice: 7.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        "matchmaker-v1": {
+          title: "The Matchmaker's Fiancé Vol.1",
+          backUrl: "matchmaker-vol1.html",
+          volumePrice: 6.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch4",
+              label: "Chapter 4 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        "connie-v1": {
+          title: "All-Rounder Maid Connie Ville Vol.1",
+          backUrl: "allrounder-vol1.html",
+          volumePrice: 6.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch4",
+              label: "Chapter 4 - Covert Mission",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        "connie-v2": {
+          title: "All-Rounder Maid Connie Ville Vol.2",
+          backUrl: "allrounder-vol2.html",
+          volumePrice: 6.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch4",
+              label: "Chapter 4 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        "royal-v1": {
+          title: "The Royal's Secret Vol.1",
+          backUrl: "royal-vol1.html",
+          volumePrice: 6.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch4",
+              label: "Chapter 4 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        "pale-v2": {
+          title: "A Pale Moon Reverie Vol.2",
+          backUrl: "pale-vol2.html",
+          volumePrice: 6.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch4",
+              label: "Chapter 4 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        borrowing: {
+          title: "Borrowing Your Textbook 175160",
+          backUrl: "borrowing.html",
+          volumePrice: 6.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch4",
+              label: "Chapter 4 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        timecloset: {
+          title: "Time is a Closet",
+          backUrl: "timeisa.html",
+          volumePrice: 6.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        afternoontea: {
+          title: "Afternoon Tea for Two",
+          backUrl: "afternoon.html",
+          volumePrice: 6.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        "zombie-v1": {
+          title: "The Abandoned Villainess Became a Zombie Vol.1",
+          backUrl: "abandonedvillainess-vol1.html",
+          volumePrice: 9.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        "zombie-v2": {
+          title: "The Abandoned Villainess Became a Zombie Vol.2",
+          backUrl: "abandonedvillainess-vol2.html",
+          volumePrice: 9.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        "raeliana-v1": {
+          title: "Why Raeliana Ended Up at the Duke's Mansion Vol.1",
+          backUrl: "whyraeliana-vol1.html",
+          volumePrice: 9.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        "raeliana-v2": {
+          title: "Why Raeliana Ended Up at the Duke's Mansion Vol.2",
+          backUrl: "whyraeliana-vol2.html",
+          volumePrice: 9.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        until: {
+          title: "Until We Fall In Love",
+          backUrl: "until.html",
+          volumePrice: 6.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        theking: {
+          title: "The King of Owls and His Troubled Servant",
+          backUrl: "theking.html",
+          volumePrice: 6.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        "roommate-vol1": {
+          title: "Roommate",
+          backUrl: "room-vol1.html",
+          volumePrice: 6.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        thebird: {
+          title: "The Bird In The Cage Dreams",
+          backUrl: "thebird.html",
+          volumePrice: 6.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        gaze: {
+          title: "A Gaze Like Lightning",
+          backUrl: "gaze.html",
+          volumePrice: 6.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+        "roommate-vol2": {
+          title: "Roommate Vol.2",
+          backUrl: "room-vol2.html",
+          volumePrice: 6.99,
+          chapters: [
+            {
+              id: "ch1",
+              label: "Chapter 1 - chapter name",
+              free: true,
+              price: 0,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch2",
+              label: "Chapter 2 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+            {
+              id: "ch3",
+              label: "Chapter 3 - chapter name",
+              free: false,
+              price: 0.99,
+              pdfSrc: "assets/sample.pdf",
+            },
+          ],
+        },
+      };
+
+      // ══════════════════════════════════════════════════════════════════════════
+      // STATE
+      // ══════════════════════════════════════════════════════════════════════════
+      const params = new URLSearchParams(window.location.search);
+      let currentTitle = params.get("title") || "chigaya-v1";
+      let currentCh = params.get("ch") || "ch1";
+      let titleData, chIndex;
+      let currentZoom = 1.0;
+      let pdfDoc = null;
+      let renderTask = null;
+      let viewMode = "single-vert";
+
+      // Horizontal-specific state
+      let horizSlideIndex = 0;
+      let horizSlideCount = 0;
+      let horizNavLocked = false;
+
+      // ── Helpers ────────────────────────────────────────────────────────────────
+      function isHorizMode() {
+        return viewMode === "single-horiz" || viewMode === "double-horiz";
+      }
+      function isDoubleMode() {
+        return viewMode === "double-vert" || viewMode === "double-horiz";
+      }
+
+      // ══════════════════════════════════════════════════════════════════════════
+      // INIT
+      // ══════════════════════════════════════════════════════════════════════════
+      function init() {
+        titleData = READER_DATA[currentTitle];
+        if (!titleData) {
+          showError("Title not found.", "Please go back and try again.");
+          return;
+        }
+
+        chIndex = titleData.chapters.findIndex((c) => c.id === currentCh);
+        if (chIndex < 0) chIndex = 0;
+
+        const ch = titleData.chapters[chIndex];
+
+        if (!CH_USER) {
+          sessionStorage.setItem(
+            "ch_after_read",
+            JSON.stringify({ title: currentTitle, ch: currentCh }),
+          );
+          openAuth();
+          return;
+        }
+
+        const hasAccess =
+          ch.free ||
+          isOwned(currentTitle, ch.id) ||
+          isOwned(currentTitle, "bundle");
+        if (!hasAccess) {
+          initPurchase(currentTitle, ch.id, ch.label, ch.price || 0.99);
+          return;
+        }
+
+        if (ch.free) recordFreeRead(currentTitle, ch.id);
+        loadPDF(ch);
+      }
+
+      // ══════════════════════════════════════════════════════════════════════════
+      // LOAD PDF — routes to vert or horiz
+      // ══════════════════════════════════════════════════════════════════════════
+      async function loadPDF(ch) {
+        document.getElementById("readerTitle").textContent = titleData.title;
+        document.getElementById("readerCh").textContent = ch.label;
+        document.getElementById("prevBtn").disabled = chIndex === 0;
+        document.getElementById("nextBtn").disabled =
+          chIndex >= titleData.chapters.length - 1;
+
+        if (isHorizMode()) {
+          document.getElementById("horizViewer").classList.add("active");
+          document.getElementById("readerPages").style.display = "none";
+          document.getElementById("pageIndicator").classList.add("hidden");
+          document.getElementById("vertPrevBtn").classList.add("hidden");
+          document.getElementById("vertNextBtn").classList.add("hidden");
+          positionHorizViewer();
+
+          document.getElementById("horizStrip").innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:center;width:100vw;height:100%;">
+              <div class="pdf-loading" style="padding:40px 24px">
+                <div class="pdf-loading-ring"></div>
+                <span>Loading ${ch.label}…</span>
+              </div>
+            </div>`;
+          document.getElementById("horizDots").innerHTML = "";
+          document.getElementById("horizCounter").textContent = "";
+          horizSlideIndex = 0;
+        } else {
+          document.getElementById("horizViewer").classList.remove("active");
+          document.getElementById("readerPages").style.display = "";
+          document.getElementById("pageIndicator").classList.remove("hidden");
+          document.getElementById("readerPages").innerHTML = `
+            <div class="pdf-loading">
+              <div class="pdf-loading-ring"></div>
+              <span>Loading ${ch.label}…</span>
+            </div>`;
+          document.getElementById("pageIndicator").textContent = "Loading…";
+        }
+
+        if (renderTask) {
+          try {
+            renderTask.cancel();
+          } catch (e) {}
+          renderTask = null;
+        }
+        pdfDoc = null;
+
+        try {
+          pdfDoc = await pdfjsLib.getDocument({ url: ch.pdfSrc }).promise;
+          const startPage = ch.pageStart || 1;
+          const endPage = ch.pageEnd || pdfDoc.numPages;
+          if (isHorizMode()) {
+            await buildHorizSlides(startPage, endPage);
+          } else {
+            await renderVerticalPages(ch, startPage, endPage);
+          }
+        } catch (err) {
+          if (err && err.name === "RenderingCancelledException") return;
+          console.error("PDF load error:", err);
+          showError(
+            "Could not load this chapter.",
+            `Check your connection and try again. (${err.message || err})`,
+          );
+        }
+      }
+
+      // ══════════════════════════════════════════════════════════════════════════
+      // VERTICAL MODES
+      // ══════════════════════════════════════════════════════════════════════════
+
+      async function renderVerticalPages(ch, startPage, endPage) {
+        const container = document.getElementById("readerPages");
+        container.innerHTML = "";
+        container.classList.remove("narrow", "wide");
+        if (viewMode === "double-vert") container.classList.add("wide");
+
+        if (isDoubleMode()) {
+          for (let i = startPage; i <= endPage; i += 2) {
+            const pair = document.createElement("div");
+            pair.className = "double-pair";
+            pair.appendChild(makeVertWrap(i));
+            if (i + 1 <= endPage) pair.appendChild(makeVertWrap(i + 1));
+            container.appendChild(pair);
+          }
+        } else {
+          for (let i = startPage; i <= endPage; i++)
+            container.appendChild(makeVertWrap(i));
+        }
+
+        updatePageIndicator(1, endPage - startPage + 1);
+
+        for (let p = startPage; p <= endPage; p++) {
+          try {
+            await renderPageVertical(p);
+          } catch (e) {
+            if (e && e.name === "RenderingCancelledException") return;
+          }
+        }
+
+        const nextCh = titleData.chapters[chIndex + 1];
+        if (nextCh) {
+          const nextOwned =
+            nextCh.free ||
+            isOwned(currentTitle, nextCh.id) ||
+            isOwned(currentTitle, "bundle");
+          container.insertAdjacentHTML(
+            "beforeend",
+            `
+            <div class="reader-end">
+              <h3>End of ${ch.label.split("—")[0].trim()}</h3>
+              <p>Continue to <strong>${nextCh.label}</strong></p>
+              <button class="btn-gold" onclick="${
+                nextOwned
+                  ? `loadChapter('${nextCh.id}')`
+                  : CH_USER
+                    ? `initPurchase('${currentTitle}','${nextCh.id}','${nextCh.label.replace(/'/g, "\\'")}',${nextCh.price || 0.99})`
+                    : `openAuth()`
+              }">
+                ${nextOwned ? "▶ Read Next Chapter" : `Unlock for $${(nextCh.price || 0.99).toFixed(2)}`}
+              </button>
+            </div>`,
+          );
+        }
+        updateProgress();
+      }
+
+      function makeVertWrap(pageNum) {
+        const wrap = document.createElement("div");
+        wrap.className = "pdf-page-wrap";
+        wrap.id = "vert-wrap-" + pageNum;
+        wrap.innerHTML = '<div class="pdf-page-skeleton"></div>';
+        return wrap;
+      }
+
+      async function renderPageVertical(pageNum) {
+        const page = await pdfDoc.getPage(pageNum);
+        const wrap = document.getElementById("vert-wrap-" + pageNum);
+        if (!wrap) return;
+        const containerW =
+          document.getElementById("readerPages").clientWidth || 760;
+        const vp0 = page.getViewport({ scale: 1 });
+        const scale = (containerW / vp0.width) * currentZoom;
+        const vp = page.getViewport({ scale });
+
+        const canvas = document.createElement("canvas");
+        canvas.width = vp.width;
+        canvas.height = vp.height;
+
+        wrap.innerHTML = "";
+        wrap.appendChild(canvas);
+        const shield = document.createElement("div");
+        shield.className = "page-shield";
+        wrap.appendChild(shield);
+
+        renderTask = page.render({
+          canvasContext: canvas.getContext("2d"),
+          viewport: vp,
+        });
+        await renderTask.promise;
+        renderTask = null;
+        drawWatermark(canvas);
+      }
+
+      // ══════════════════════════════════════════════════════════════════════════
+      // HORIZONTAL MODES  ← FIXED: no DPR distortion, matches vertical quality
+      // ══════════════════════════════════════════════════════════════════════════
+
+      function positionHorizViewer() {
+        const topbar = document.getElementById("readerTopbar");
+        const rect = topbar ? topbar.getBoundingClientRect() : { bottom: 80 };
+        document.getElementById("horizViewer").style.top = rect.bottom + "px";
+      }
+
+      async function buildHorizSlides(startPage, endPage) {
+        const strip = document.getElementById("horizStrip");
+        const isDouble = viewMode === "double-horiz";
+        strip.innerHTML = "";
+        horizSlideIndex = 0;
+
+        // Build slides list
+        const slides = [];
+        if (isDouble) {
+          for (let i = startPage; i <= endPage; i += 2)
+            slides.push(i + 1 <= endPage ? [i, i + 1] : [i]);
+        } else {
+          for (let i = startPage; i <= endPage; i++) slides.push([i]);
+        }
+        horizSlideCount = slides.length;
+
+        // Available width inside one slide (subtract padding: 64px × 2 = 128px)
+        const SLIDE_PAD = 128;
+        const vwPx = window.innerWidth - SLIDE_PAD;
+
+        // Get true page aspect ratio from first page
+        const firstPg = await pdfDoc.getPage(startPage);
+        const vp0 = firstPg.getViewport({ scale: 1 });
+        const pageAR = vp0.width / vp0.height; // width / height
+
+        // Compute target page WIDTH — zoom scales linearly from the base fit
+        let pageW;
+        if (isDouble) {
+          // Two pages side by side with 8px gap
+          const refW = Math.floor((vwPx - 8) / 2);
+          pageW = Math.round(refW * currentZoom);
+        } else {
+          pageW = Math.round(vwPx * currentZoom);
+        }
+
+        // Derive height from aspect ratio — no independent clamping that breaks AR
+        let pageH = Math.round(pageW / pageAR);
+
+        // Clamp to available viewer height so pages never overflow vertically
+        const viewer = document.getElementById("horizViewer");
+        const indicH =
+          document.getElementById("horizIndicator").offsetHeight || 40;
+        const paddingV = 24;
+        const maxH = viewer.clientHeight - indicH - paddingV;
+        if (pageH > maxH) {
+          // Recalculate both dimensions preserving aspect ratio
+          pageH = maxH;
+          pageW = Math.round(pageH * pageAR);
+        }
+
+        // Build DOM — skeleton uses the same computed dimensions
+        slides.forEach((pair, slideIdx) => {
+          const slide = document.createElement("div");
+          slide.className = "horiz-slide";
+          slide.dataset.slide = slideIdx;
+
+          pair.forEach((pn) => {
+            const wrap = document.createElement("div");
+            wrap.className = "horiz-page-wrap";
+            wrap.id = "horiz-wrap-" + pn;
+            // Set wrap size explicitly so skeleton matches final canvas exactly
+            wrap.style.width = pageW + "px";
+            wrap.style.height = pageH + "px";
+
+            const skel = document.createElement("div");
+            skel.className = "pdf-page-skeleton";
+            skel.style.width = pageW + "px";
+            skel.style.height = pageH + "px";
+            wrap.appendChild(skel);
+            slide.appendChild(wrap);
+          });
+
+          strip.appendChild(slide);
+        });
+
+        // Reset strip position instantly
+        strip.classList.add("no-transition");
+        strip.style.transform = "translateX(0)";
+        requestAnimationFrame(() => strip.classList.remove("no-transition"));
+
+        buildHorizIndicator(horizSlideCount);
+        updateHorizNav();
+        updateHorizIndicator(0);
+
+        // Render all pages — same scale approach as vertical, no DPR tricks
+        const allPages = slides.flatMap((p) => p);
+        for (const pn of allPages) {
+          try {
+            await renderPageHoriz(pn, pageW, pageH);
+          } catch (e) {
+            if (e && e.name === "RenderingCancelledException") return;
+          }
+        }
+      }
+
+      // ── KEY FIX: renderPageHoriz now mirrors renderPageVertical exactly ────────
+      async function renderPageHoriz(pageNum, targetW, targetH) {
+        const page = await pdfDoc.getPage(pageNum);
+        const wrap = document.getElementById("horiz-wrap-" + pageNum);
+        if (!wrap) return;
+
+        const vp0 = page.getViewport({ scale: 1 });
+
+        // Scale to targetW exactly — same logic as vertical, no DPR multiplication
+        const scale = (targetW / vp0.width) * currentZoom;
+        const vp = page.getViewport({ scale });
+
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(vp.width);
+        canvas.height = Math.round(vp.height);
+
+        // Let CSS display the canvas at its natural rendered size — no override
+        canvas.style.width = "100%";
+        canvas.style.height = "auto";
+        canvas.style.display = "block";
+
+        wrap.innerHTML = "";
+        wrap.appendChild(canvas);
+        const shield = document.createElement("div");
+        shield.className = "page-shield";
+        wrap.appendChild(shield);
+
+        renderTask = page.render({
+          canvasContext: canvas.getContext("2d"),
+          viewport: vp,
+        });
+        await renderTask.promise;
+        renderTask = null;
+        drawWatermark(canvas);
+      }
+
+      // ── Navigate one slide ─────────────────────────────────────────────────────
+      function horizNav(dir) {
+        if (horizNavLocked) return;
+        const next = horizSlideIndex + dir;
+        if (next < 0 || next >= horizSlideCount) return;
+        horizNavLocked = true;
+        horizSlideIndex = next;
+
+        const strip = document.getElementById("horizStrip");
+        strip.classList.remove("no-transition");
+        strip.style.transform = `translateX(${-horizSlideIndex * 100}vw)`;
+
+        updateHorizNav();
+        updateHorizIndicator(horizSlideIndex);
+
+        const fill = document.getElementById("progressFill");
+        if (fill && horizSlideCount > 1)
+          fill.style.width =
+            (horizSlideIndex / (horizSlideCount - 1)) * 100 + "%";
+
+        setTimeout(() => {
+          horizNavLocked = false;
+        }, 240);
+      }
+
+      function updateHorizNav() {
+        document
+          .getElementById("horizPrevBc")
+          .classList.toggle("hidden", horizSlideIndex === 0);
+        document
+          .getElementById("horizNextBc")
+          .classList.toggle("hidden", horizSlideIndex >= horizSlideCount - 1);
+      }
+
+      function buildHorizIndicator(total) {
+        const dots = document.getElementById("horizDots");
+        const counter = document.getElementById("horizCounter");
+        dots.innerHTML = "";
+        if (total <= 20) {
+          for (let i = 0; i < total; i++) {
+            const d = document.createElement("div");
+            d.className = "hdot";
+            d.dataset.i = i;
+            dots.appendChild(d);
+          }
+          dots.style.display = "flex";
+          counter.style.display = "none";
+        } else {
+          dots.style.display = "none";
+          counter.style.display = "block";
+        }
+      }
+
+      function updateHorizIndicator(idx) {
+        if (horizSlideCount <= 20) {
+          document
+            .querySelectorAll(".hdot")
+            .forEach((d, i) => d.classList.toggle("active", i === idx));
+        } else {
+          document.getElementById("horizCounter").textContent =
+            `${idx + 1} / ${horizSlideCount}`;
+        }
+      }
+
+      // ══════════════════════════════════════════════════════════════════════════
+      // INPUT HANDLERS — Horizontal modes
+      // ══════════════════════════════════════════════════════════════════════════
+
+      let wheelCooldown = false;
+      document.addEventListener(
+        "wheel",
+        (e) => {
+          if (!isHorizMode()) return;
+          e.preventDefault();
+          if (wheelCooldown) return;
+          const dir =
+            (Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY) > 0
+              ? 1
+              : -1;
+          horizNav(dir);
+          wheelCooldown = true;
+          setTimeout(() => {
+            wheelCooldown = false;
+          }, 320);
+        },
+        { passive: false },
+      );
+
+      document.addEventListener("keydown", (e) => {
+        if (!isHorizMode()) return;
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+          e.preventDefault();
+          horizNav(1);
+        }
+        if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+          e.preventDefault();
+          horizNav(-1);
+        }
+      });
+
+      (function () {
+        const track = document.getElementById("horizTrack");
+        let dragStartX = 0,
+          dragging = false,
+          moved = false;
+        const THRESHOLD = 60;
+        track.addEventListener("mousedown", (e) => {
+          if (!isHorizMode() || e.target.closest(".horiz-bc-btn")) return;
+          dragging = true;
+          moved = false;
+          dragStartX = e.clientX;
+          track.classList.add("dragging");
+        });
+        window.addEventListener("mousemove", (e) => {
+          if (!dragging) return;
+          if (Math.abs(e.clientX - dragStartX) > 10) moved = true;
+        });
+        window.addEventListener("mouseup", (e) => {
+          if (!dragging) return;
+          dragging = false;
+          track.classList.remove("dragging");
+          if (!moved) return;
+          const dx = e.clientX - dragStartX;
+          if (Math.abs(dx) >= THRESHOLD) horizNav(dx < 0 ? 1 : -1);
+        });
+      })();
+
+      (function () {
+        let tx = 0,
+          ty = 0;
+        const THRESHOLD = 50;
+        document.addEventListener(
+          "touchstart",
+          (e) => {
+            tx = e.touches[0].clientX;
+            ty = e.touches[0].clientY;
+          },
+          { passive: true },
+        );
+        document.addEventListener(
+          "touchend",
+          (e) => {
+            if (!isHorizMode()) return;
+            const dx = tx - e.changedTouches[0].clientX;
+            const dy = ty - e.changedTouches[0].clientY;
+            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) >= THRESHOLD)
+              horizNav(dx > 0 ? 1 : -1);
+          },
+          { passive: true },
+        );
+      })();
+
+      // ══════════════════════════════════════════════════════════════════════════
+      // SHARED UTILITIES
+      // ══════════════════════════════════════════════════════════════════════════
+
+      function drawWatermark(canvas) {
+        const ctx = canvas.getContext("2d");
+        const wText = "CROSSED HEARTS - LICENSED COPY - THECROSSEDHEARTS.COM";
+        const fontSize = Math.max(12, canvas.width * 0.018);
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(-0.45);
+        ctx.font = `${fontSize}px sans-serif`;
+        ctx.fillStyle = "rgba(180,180,180,0.12)";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const spacing = fontSize * 5;
+        const rows = Math.ceil(canvas.height / spacing) + 2;
+        for (let r = -rows; r <= rows; r++) ctx.fillText(wText, 0, r * spacing);
+        ctx.restore();
+      }
+
+      function changeChapter(dir) {
+        const newIdx = chIndex + dir;
+        if (newIdx < 0 || newIdx >= titleData.chapters.length) return;
+        loadChapter(titleData.chapters[newIdx].id);
+      }
+
+      function loadChapter(chId) {
+        const ch = titleData.chapters.find((c) => c.id === chId);
+        if (!ch) return;
+
+        if (!CH_USER) {
+          sessionStorage.setItem(
+            "ch_after_read",
+            JSON.stringify({ title: currentTitle, ch: chId }),
+          );
+          openAuth();
+          return;
+        }
+
+        const hasAccess =
+          ch.free ||
+          isOwned(currentTitle, ch.id) ||
+          isOwned(currentTitle, "bundle");
+        if (!hasAccess) {
+          initPurchase(currentTitle, ch.id, ch.label, ch.price || 0.99);
+          return;
+        }
+
+        if (ch.free) recordFreeRead(currentTitle, ch.id);
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("title", currentTitle);
+        url.searchParams.set("ch", chId);
+        window.history.pushState({}, "", url);
+        currentCh = chId;
+        chIndex = titleData.chapters.findIndex((c) => c.id === chId);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        loadPDF(ch);
+      }
+
+      function changeZoom(delta) {
+        currentZoom = Math.max(0.5, Math.min(2.0, currentZoom + delta));
+        document.getElementById("zoomLabel").textContent =
+          Math.round(currentZoom * 100) + "%";
+        if (!pdfDoc) return;
+        if (isHorizMode()) {
+          const ch = titleData.chapters[chIndex];
+          buildHorizSlides(ch.pageStart || 1, ch.pageEnd || pdfDoc.numPages);
+        } else {
+          loadPDF(titleData.chapters[chIndex]);
+        }
+      }
+
+      function setViewMode(mode, btn) {
+        viewMode = mode;
+        document
+          .querySelectorAll(".view-mode-btn")
+          .forEach((b) => b.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+        if (pdfDoc) loadPDF(titleData.chapters[chIndex]);
+      }
+
+      function updateProgress() {
+        if (isHorizMode()) return;
+        const pages = document.getElementById("readerPages");
+        if (!pages) return;
+        const pct =
+          pages.scrollHeight > window.innerHeight
+            ? Math.min(
+                100,
+                (window.scrollY / (pages.scrollHeight - window.innerHeight)) *
+                  100,
+              )
+            : 100;
+        const fill = document.getElementById("progressFill");
+        if (fill) fill.style.width = pct + "%";
+        const wraps = pages.querySelectorAll(".pdf-page-wrap");
+        let current = 1;
+        wraps.forEach((el, idx) => {
+          if (el.getBoundingClientRect().top < window.innerHeight * 0.5)
+            current = idx + 1;
+        });
+        updatePageIndicator(current, wraps.length);
+        updateVertArrows(current, wraps.length);
+      }
+
+      function updateVertArrows(current, total) {
+        const prevBtn = document.getElementById("vertPrevBtn");
+        const nextBtn = document.getElementById("vertNextBtn");
+        if (!prevBtn || !nextBtn) return;
+        prevBtn.classList.toggle("hidden", current <= 1);
+        nextBtn.classList.toggle("hidden", current >= total);
+      }
+
+      function vertNav(dir) {
+        const pages = document.getElementById("readerPages");
+        if (!pages) return;
+        const wraps = Array.from(pages.querySelectorAll(".pdf-page-wrap"));
+        if (!wraps.length) return;
+        let current = 0;
+        wraps.forEach((el, idx) => {
+          if (el.getBoundingClientRect().top < window.innerHeight * 0.5)
+            current = idx;
+        });
+        const target = wraps[current + dir];
+        if (target)
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      function updatePageIndicator(current, total) {
+        const ind = document.getElementById("pageIndicator");
+        if (ind) ind.textContent = `Page ${current} of ${total}`;
+      }
+
+      window.addEventListener("scroll", updateProgress, { passive: true });
+      window.addEventListener("resize", () => {
+        positionHorizViewer();
+        if (isHorizMode()) positionHorizViewer();
+      });
+
+      function goBack() {
+        window.location.href = titleData ? titleData.backUrl : "library.html";
+      }
+
+      function showError(title, msg) {
+        const html = `<div class="pdf-error"><h3>${title}</h3><p>${msg}</p>
+          <button class="btn-ghost" onclick="goBack()">← Go Back</button></div>`;
+        if (isHorizMode()) {
+          document.getElementById("horizStrip").innerHTML =
+            `<div style="display:flex;align-items:center;justify-content:center;width:100vw;height:100%">${html}</div>`;
+        } else {
+          document.getElementById("readerPages").innerHTML = html;
+        }
+      }
+
+      function recordFreeRead(titleId, chId) {
+        if (!CH_USER) return;
+        if (!CH_LIB[titleId]) CH_LIB[titleId] = [];
+        if (
+          !CH_LIB[titleId].includes(chId) &&
+          !CH_LIB[titleId].includes("bundle")
+        ) {
+          CH_LIB[titleId].push(chId);
+          const libJson = JSON.stringify(CH_LIB);
+          sessionStorage.setItem("ch_lib", libJson);
+          if (CH_USER && CH_USER.email)
+            localStorage.setItem("ch_lib_" + CH_USER.email, libJson);
+        }
+      }
+
+      function onAuthChange() {
+        const pending = sessionStorage.getItem("ch_after_read");
+        if (pending && CH_USER) {
+          try {
+            const p = JSON.parse(pending);
+            sessionStorage.removeItem("ch_after_read");
+            if (p.title === currentTitle) {
+              loadChapter(p.ch);
+            } else {
+              window.location.href =
+                "reader.html?title=" + p.title + "&ch=" + p.ch;
+            }
+            return;
+          } catch (e) {}
+        }
+        init();
+      }
+
+      init();
+      renderAuthForm("in");
+    </script>
+  </body>
+</html>
